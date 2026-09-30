@@ -35,6 +35,14 @@ class HistoryLine(QFrame):
             outputtedString, alignment=QtCore.Qt.AlignmentFlag.AlignRight
         )
 
+        self.outputLabel.setStyleSheet("""
+            QFrame {
+                background-color: #cccccc;
+                border: 3px solid #a0a0a0; 
+                border-radius: 10px;        
+            }
+        """)
+
         vLayout.addWidget(self.inputLabel,alignment = QtCore.Qt.AlignmentFlag.AlignTop)
         vLayout.addWidget(self.outputLabel,alignment = QtCore.Qt.AlignmentFlag.AlignBottom)
 

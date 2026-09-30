@@ -16,14 +16,7 @@ class MyWidget(QtWidgets.QWidget):
         self.historyScroller = QtWidgets.QScrollArea()
         self.historyHolder = QtWidgets.QFrame()
 
-
-        self.historyScroller.setStyleSheet("""
-            QFrame {
-                background-color: #f0f0f0;
-                border: 1px solid #cccccc; 
-                border-radius: 10px;        
-            }
-        """)
+        self.applyFormatting()
 
         historyLayout = QVBoxLayout(self.historyHolder)
         historyLayout.addStretch()
@@ -45,11 +38,49 @@ class MyWidget(QtWidgets.QWidget):
     def parseMath(self):
         text = self.mathsBox.text()
         parsedResult = text + " I done thunked about this"
+        self.mathsBox.setFocus()
 
         newHistoryRow = ggraph.HistoryLine.HistoryLine(text,parsedResult)
         self.historyHolder.layout().addWidget(newHistoryRow)
 
         print(text + ": " + parsedResult)
+
+    def applyFormatting(self):
+        self.historyScroller.setStyleSheet("""
+            QFrame {
+                background-color: #f0f0f0;
+                border: 1px solid #cccccc; 
+                border-radius: 10px;        
+            }
+        """)
+
+
+        self.mathsBox.setStyleSheet("""
+            QLineEdit {
+                background-color: #f0f0f0;
+                border: 3px solid #aaaaaa; 
+                border-radius: 5px;        
+            }
+        """)
+
+
+        self.historyScroller.setStyleSheet("""
+            QFrame {
+                background-color: #f0f0f0;
+                border: 1px solid #cccccc; 
+                border-radius: 10px;        
+            }
+        """)
+
+
+        self.submitMath.setStyleSheet("""
+            QPushButton {
+                background-color: #f0f0f0;
+                border: 2px solid #cccccc; 
+                border-radius: 10px;        
+            }
+        """)
+
 
 
 def main() -> None:
