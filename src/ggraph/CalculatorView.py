@@ -1,15 +1,17 @@
 from PySide6 import QtCore, QtWidgets
-from PySide6.QtGui import QKeySequence
+from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import QVBoxLayout
 
 import ggraph.HistoryLine
+import ggraph.HistoryManager
 
 
 class CalculatorView(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
 
-        self.mathsBox = QtWidgets.QLineEdit("testing 123")
+        self.mathsBox = QtWidgets.QLineEdit("")
+        self.historyManager = ggraph.HistoryManager.HistoryManager()
         self.submitMath = QtWidgets.QPushButton("Submit Math")
         self.historyScroller = QtWidgets.QScrollArea()
         self.historyHolder = QtWidgets.QFrame()
@@ -24,13 +26,15 @@ class CalculatorView(QtWidgets.QWidget):
         self.historyScroller.setWidgetResizable(True)
 
         self.submitMath.clicked.connect(self.parseMath)
-        self.submitMath.setShortcut(QKeySequence("Return"))
+        self.setupKeybinds()
 
         layout = QtWidgets.QVBoxLayout(self)
 
         layout.addWidget(self.historyScroller)
         layout.addWidget(self.mathsBox)
         layout.addWidget(self.submitMath)
+
+        self.mathsBox.setFocus()
 
 
     @QtCore.Slot()
@@ -41,6 +45,10 @@ class CalculatorView(QtWidgets.QWidget):
 
         newHistoryRow = ggraph.HistoryLine.HistoryLine(text,parsedResult)
         self.historyHolder.layout().addWidget(newHistoryRow)
+        self.historyManager.addToCalcHistory(text)
+        self.historyManager.addToCalcHistory(parsedResult)
+
+        self.mathsBox.setText("")
 
         # Wait for the scrollbar max value to update, then scroll to the bottom
         QtCore.QTimer.singleShot(5, lambda: self.scrollbar.setValue(self.scrollbar.maximum()))
@@ -72,4 +80,28 @@ class CalculatorView(QtWidgets.QWidget):
                 border-radius: 10px;        
             }
         """)
+
+    def setupKeybinds(self):
+
+        self.submitMath.setShortcut(QKeySequence("Return"))
+        self.nextHistory = QShortcut(QKeySequence("Up"), self)
+        self.previousHistory = QShortcut(QKeySequence("Down"), self)
+        
+        # Only activate up and down when the CalculatorView or its children are focuesed
+        self.previousHistory.setContext(
+            QtCore.Qt.ShortcutContext.WidgetWithChildrenShortcut
+        )
+        self.nextHistory.setContext(
+            QtCore.Qt.ShortcutContext.WidgetWithChildrenShortcut
+        )
+        
+        self.nextHistory.activated.connect(self.applyNextHistoryItem)
+        self.previousHistory.activated.connect(self.applyPreviousHistoryItem)
+
+
+    def applyNextHistoryItem(self):
+        self.mathsBox.setText(self.historyManager.getNextHistoryItem())
+
+    def applyPreviousHistoryItem(self):
+        self.mathsBox.setText(self.historyManager.getPreviousHistoryItem())
 
