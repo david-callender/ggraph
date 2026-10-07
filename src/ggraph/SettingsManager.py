@@ -3,7 +3,11 @@ from PySide6 import QtCore, QtWidgets
 
 class SettingsManager(QtCore.QSettings):
     def __init__(self):
-        super().__init__("Social Coding", "GGraph")
+        super().__init__("Social-Coding", "GGraph")
+        print(self.fileName())
+        if self.allKeys().__len__() == 0:
+            self.createConfigFile()
+
 
     def getRoundingRadiusSmall(self):
         return self.value("ui/smallCornerRadius",5)
@@ -18,7 +22,7 @@ class SettingsManager(QtCore.QSettings):
         return self.value("ui/bigBorderRadius",3)
 
     def getBorderRadiusMed(self):
-        return self.value("ui/medgBorderRadius",2)
+        return self.value("ui/medBorderRadius",2)
 
     def getBorderRadiusSmall(self):
         return self.value("ui/smallBorderRadius",1)
@@ -103,3 +107,20 @@ class SettingsManager(QtCore.QSettings):
                     border-radius: {self.getRoundingRadiusSmall()}px;
                 }}
             """)
+
+    def createConfigFile(self):
+        self.setValue("ui/smallCornerRadius",5)
+        self.setValue("ui/medlCornerRadius",2)
+        self.setValue("ui/bigCornerRadius",10)
+        self.setValue("ui/bigBorderRadius",3)
+        self.setValue("ui/medBorderRadius",3)
+        self.setValue("ui/smallBorderRadius",1)
+        self.setValue("ui/backgroundColor","161217")
+        self.setValue("ui/surfaceColor","161217")
+        self.setValue("ui/onSurfaceColor","e8e0e8")   
+        self.setValue("ui/onBackgroundColor","e8e0e8")   
+        self.setValue("ui/errorColor","ffb4ab")   
+        self.setValue("ui/primaryColor","deb8f7")   
+        self.setValue("ui/primaryOnColor","402357")   
+        self.setValue("ui/secondaryColor","2d2433")   
+        self.setValue("ui/secondaryOnColor","d1c1d9")   
