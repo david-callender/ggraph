@@ -12,17 +12,19 @@ class SettingsManager(QtCore.QSettings):
         if self.allKeys().__len__() == 0:
             print("No config file found, creating default")
             self.createConfigFile()
+
         self.watcher = QFileSystemWatcher()
         self.watcher.addPath(osPath.dirname(self.fileName()))
         self.watcher.addPath(self.fileName())
         self.watcher.directoryChanged.connect(self.reloadConfig)
         self.watcher.fileChanged.connect(self.reloadConfig)
+
         self.reloadConfig()
 
     def reloadConfig(self):
         self.sync()
+
         print("Reloading Config from File")
-        print(self.getColorBackground())
 
         if self.fileName() not in self.watcher.files():
             self.watcher.addPath(self.fileName())
@@ -85,7 +87,7 @@ class SettingsManager(QtCore.QSettings):
                 }}
                 QFrame {{
                     background-color: #{self.getColorSurface()};
-                    border: {self.getBorderRadiusMed()}px solid #{self.getColorOnSurface()}; 
+                    border: {self.getBorderRadiusSmall()}px solid #{self.getColorOnSurface()}; 
                     border-radius: {self.getRoundingRadiusBig()}px;        
                 }}
                 QLineEdit {{
@@ -100,33 +102,84 @@ class SettingsManager(QtCore.QSettings):
                     border: {self.getBorderRadiusSmall()}px solid #{self.getColorOnSurface()}; 
                     border-radius: {self.getRoundingRadiusSmall()}px;
                 }}
+                QLabel[class="label-error"] {{
+                    color: #{self.getColorOnSecondary()};
+                    background-color: #{self.getColorError()};
+                    border: {self.getBorderRadiusSmall()}px solid #{self.getColorOnSecondary()}; 
+                    border-radius: {self.getRoundingRadiusSmall()}px;
+                }}
+                QLabel[class="label-secondary"] {{
+                    color: #{self.getColorOnSurface()};
+                    background-color: #{self.getColorSurface()};
+                    border: {self.getBorderRadiusMed()}px solid #{self.getColorSecondary()}; 
+                    border-radius: {self.getRoundingRadiusSmall()}px;
+                }}
                 QPushButton {{
                     color: #{self.getColorOnPrimary()};
                     background-color: #{self.getColorPrimary()};
                     border: {self.getBorderRadiusBig()}px solid #{self.getColorOnPrimary()}; 
                     border-radius: {self.getRoundingRadiusBig()}px;        
                 }}
+
+                /* ===================================================================
+                   ScrollBar and its many bits
+                   =================================================================== */
+                QScrollBar:vertical {{
+                    background-color: #{self.getColorSurface()};
+                    border: none;
+                    width: 12px;
+                    margin: 0px;
+                }}
+
+                QScrollBar:horizontal {{
+                    background-color: #{self.getColorSurface()};
+                    border: none;
+                    height: 12px;
+                    margin: 0px;
+                }}
                 
-            """)
-
-    def themeSecondaryLabel(self, label: QtWidgets.QLabel):
-        label.setStyleSheet(f"""
-                QLabel {{
-                    color: #{self.getColorOnSecondary()};
-                    background-color: #{self.getColorSecondary()};
-                    border: {self.getBorderRadiusSmall()}px solid #{self.getColorOnSecondary()}; 
+                QScrollBar::handle:vertical,
+                QScrollBar::handle:horizontal {{
+                    background-color: #{self.getColorPrimary()};
+                    border: {self.getBorderRadiusSmall()}px solid #{self.getColorOnPrimary()};
                     border-radius: {self.getRoundingRadiusSmall()}px;
+                    margin: 0px;
                 }}
-            """)
 
-    def themeErrorLabel(self, label: QtWidgets.QLabel):
-        label.setStyleSheet(f"""
-                QLabel {{
-                    color: #{self.getColorError()};
-                    background-color: #{self.getColorSecondary()};
-                    border: {self.getBorderRadiusSmall()}px solid #{self.getColorOnSecondary()}; 
-                    border-radius: {self.getRoundingRadiusSmall()}px;
+                QScrollBar::handle:vertical {{
+                    min-height: 20px;
                 }}
+
+                QScrollBar::handle:horizontal {{
+                    min-width: 20px;
+                }}
+
+                /* Hover and Pressed States for Handle */
+                QScrollBar::handle:vertical:hover,
+                QScrollBar::handle:horizontal:hover {{
+                    background-color: #{self.getColorSecondary()};
+                    border-color: #{self.getColorOnSecondary()};
+                }}
+
+                QScrollBar::handle:vertical:pressed,
+                QScrollBar::handle:horizontal:pressed {{
+                    background-color: #{self.getColorOnSurface()};
+                }}
+
+                QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical,
+                QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{
+                    border: none;
+                    background: none;
+                    height: 0px;
+                    width: 0px;
+                }}
+
+                QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical,
+                QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {{
+                    background: none;
+                }}
+
+                
             """)
 
     def createConfigFile(self):

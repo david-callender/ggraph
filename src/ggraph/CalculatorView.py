@@ -19,11 +19,12 @@ class CalculatorView(QtWidgets.QWidget):
         self.historyHolder = QtWidgets.QFrame()
         self.scrollbar = self.historyScroller.verticalScrollBar()
 
-        # self.applyFormatting(settings)
+        self.historyHolder.mouseDoubleClickEvent
 
         historyLayout = QVBoxLayout(self.historyHolder)
         historyLayout.addStretch()
         historyLayout.setAlignment(QtCore.Qt.AlignmentFlag.AlignBottom)
+        historyLayout.setContentsMargins(3,3,3,3)
         self.historyScroller.setWidget(self.historyHolder)
         self.historyScroller.setWidgetResizable(True)
 
@@ -42,14 +43,16 @@ class CalculatorView(QtWidgets.QWidget):
     @QtCore.Slot()
     def parseMath(self):
         text = self.mathsBox.text()
+
         parsedResult = (text + " I done thunked about this", False) # A tuple of a string representing the output, and a Boolean that is True if an error ocurred.
+
         self.mathsBox.setFocus()
 
         newHistoryRow = ggraph.HistoryLine.HistoryLine(text,parsedResult[0])
-        newHistoryRow.themeOutputLabel(parsedResult[1],self.settings)
+        newHistoryRow.themeOutputLabel(parsedResult[1])
         self.historyHolder.layout().addWidget(newHistoryRow)
         self.historyManager.addToCalcHistory(text)
-        self.historyManager.addToCalcHistory(parsedResult)
+        self.historyManager.addToCalcHistory(parsedResult[0])
 
         self.mathsBox.setText("")
 
@@ -57,32 +60,6 @@ class CalculatorView(QtWidgets.QWidget):
         QtCore.QTimer.singleShot(5, lambda: self.scrollbar.setValue(self.scrollbar.maximum()))
 
         print(text + ": " + parsedResult[0])
-
-    def applyFormatting(self,settings):
-        self.historyScroller.setStyleSheet(f"""
-            QFrame {{
-                background-color: #{settings.getColorSurface()};
-                border: {settings.getBorderRadiusSmall()}px solid #{settings.getColorOnSurface()}; 
-                border-radius: {settings.getRoundingRadiusBig()}px;        
-            }}
-        """)
-
-
-        self.mathsBox.setStyleSheet(f"""
-            QLineEdit {{
-                background-color: #{settings.getColorSurface()};
-                border: {settings.getBorderRadiusSmall()}px solid #{settings.getColorOnSurface()}; 
-                border-radius: {settings.getRoundingRadiusSmall()}px;        
-            }}
-        """)
-
-        self.submitMath.setStyleSheet(f"""
-            QPushButton {{
-                background-color: #{settings.getColorPrimary()};
-                border: {settings.getBorderRadiusBig()}px solid #{settings.getColorOnPrimary()}; 
-                border-radius: {settings.getRoundingRadiusBig()}px;        
-            }}
-        """)
 
     def setupKeybinds(self):
 
