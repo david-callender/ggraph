@@ -7,8 +7,10 @@ import ggraph.HistoryManager
 
 
 class CalculatorView(QtWidgets.QWidget):
-    def __init__(self):
+    def __init__(self, settings):
         super().__init__()
+
+        self.settings = settings
 
         self.mathsBox = QtWidgets.QLineEdit("")
         self.historyManager = ggraph.HistoryManager.HistoryManager()
@@ -17,7 +19,7 @@ class CalculatorView(QtWidgets.QWidget):
         self.historyHolder = QtWidgets.QFrame()
         self.scrollbar = self.historyScroller.verticalScrollBar()
 
-        self.applyFormatting()
+        # self.applyFormatting(settings)
 
         historyLayout = QVBoxLayout(self.historyHolder)
         historyLayout.addStretch()
@@ -40,10 +42,11 @@ class CalculatorView(QtWidgets.QWidget):
     @QtCore.Slot()
     def parseMath(self):
         text = self.mathsBox.text()
-        parsedResult = text + " I done thunked about this"
+        parsedResult = (text + " I done thunked about this", False) # A tuple of a string representing the output, and a Boolean that is True if an error ocurred.
         self.mathsBox.setFocus()
 
-        newHistoryRow = ggraph.HistoryLine.HistoryLine(text,parsedResult)
+        newHistoryRow = ggraph.HistoryLine.HistoryLine(text,parsedResult[0])
+        newHistoryRow.themeOutputLabel(parsedResult[1],self.settings)
         self.historyHolder.layout().addWidget(newHistoryRow)
         self.historyManager.addToCalcHistory(text)
         self.historyManager.addToCalcHistory(parsedResult)
@@ -53,32 +56,32 @@ class CalculatorView(QtWidgets.QWidget):
         # Wait for the scrollbar max value to update, then scroll to the bottom
         QtCore.QTimer.singleShot(5, lambda: self.scrollbar.setValue(self.scrollbar.maximum()))
 
-        print(text + ": " + parsedResult)
+        print(text + ": " + parsedResult[0])
 
-    def applyFormatting(self):
-        self.historyScroller.setStyleSheet("""
-            QFrame {
-                background-color: #f0f0f0;
-                border: 1px solid #cccccc; 
-                border-radius: 10px;        
-            }
+    def applyFormatting(self,settings):
+        self.historyScroller.setStyleSheet(f"""
+            QFrame {{
+                background-color: #{settings.getColorSurface()};
+                border: {settings.getBorderRadiusSmall()}px solid #{settings.getColorOnSurface()}; 
+                border-radius: {settings.getRoundingRadiusBig()}px;        
+            }}
         """)
 
 
-        self.mathsBox.setStyleSheet("""
-            QLineEdit {
-                background-color: #f0f0f0;
-                border: 3px solid #aaaaaa; 
-                border-radius: 5px;        
-            }
+        self.mathsBox.setStyleSheet(f"""
+            QLineEdit {{
+                background-color: #{settings.getColorSurface()};
+                border: {settings.getBorderRadiusSmall()}px solid #{settings.getColorOnSurface()}; 
+                border-radius: {settings.getRoundingRadiusSmall()}px;        
+            }}
         """)
 
-        self.submitMath.setStyleSheet("""
-            QPushButton {
-                background-color: #f0f0f0;
-                border: 2px solid #cccccc; 
-                border-radius: 10px;        
-            }
+        self.submitMath.setStyleSheet(f"""
+            QPushButton {{
+                background-color: #{settings.getColorPrimary()};
+                border: {settings.getBorderRadiusBig()}px solid #{settings.getColorOnPrimary()}; 
+                border-radius: {settings.getRoundingRadiusBig()}px;        
+            }}
         """)
 
     def setupKeybinds(self):
