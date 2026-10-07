@@ -8,10 +8,10 @@ import ggraph.SettingsManager
 
 def main() -> None:
     app = QtWidgets.QApplication([])
-    settings = ggraph.SettingsManager.SettingsManager()
+    settings = ggraph.SettingsManager.SettingsManager(app)
 
     widget = ggraph.CalculatorView.CalculatorView(settings)
-    settings.setupTheme(app)
+    settings.setupTheme()
     widget.resize(800, 600)
     widget.show()
 

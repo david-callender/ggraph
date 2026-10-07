@@ -1,13 +1,34 @@
+import os.path as osPath
+
 from PySide6 import QtCore, QtWidgets
+from PySide6.QtCore import QFileSystemWatcher
 
 
 class SettingsManager(QtCore.QSettings):
-    def __init__(self):
+    def __init__(self,app: QtWidgets.QApplication):
         super().__init__("Social-Coding", "GGraph")
-        print(self.fileName())
-        if self.allKeys().__len__() == 0:
-            self.createConfigFile()
+        self.app = app
 
+        if self.allKeys().__len__() == 0:
+            print("No config file found, creating default")
+            self.createConfigFile()
+        self.watcher = QFileSystemWatcher()
+        self.watcher.addPath(osPath.dirname(self.fileName()))
+        self.watcher.addPath(self.fileName())
+        self.watcher.directoryChanged.connect(self.reloadConfig)
+        self.watcher.fileChanged.connect(self.reloadConfig)
+        self.reloadConfig()
+
+    def reloadConfig(self):
+        self.sync()
+        print("Reloading Config from File")
+        print(self.getColorBackground())
+
+        if self.fileName() not in self.watcher.files():
+            self.watcher.addPath(self.fileName())
+
+        self.setupTheme()
+            
 
     def getRoundingRadiusSmall(self):
         return self.value("ui/smallCornerRadius",5)
@@ -55,8 +76,8 @@ class SettingsManager(QtCore.QSettings):
         return self.value("ui/secondaryOnColor","d1c1d9")   
 
 
-    def setupTheme(self, app:QtWidgets.QApplication):
-        app.setStyleSheet(f"""
+    def setupTheme(self):
+        self.app.setStyleSheet(f"""
                 QWidget {{
                     background-color: #{self.getColorBackground()};
                     border: {self.getBorderRadiusBig()}px solid #{self.getColorOnBackground()}; 
