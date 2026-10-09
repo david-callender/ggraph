@@ -19,12 +19,10 @@ class CalculatorView(QtWidgets.QWidget):
         self.historyHolder = QtWidgets.QFrame()
         self.scrollbar = self.historyScroller.verticalScrollBar()
 
-        self.historyHolder.mouseDoubleClickEvent
-
         historyLayout = QVBoxLayout(self.historyHolder)
         historyLayout.addStretch()
         historyLayout.setAlignment(QtCore.Qt.AlignmentFlag.AlignBottom)
-        historyLayout.setContentsMargins(3,3,3,3)
+
         self.historyScroller.setWidget(self.historyHolder)
         self.historyScroller.setWidgetResizable(True)
 

@@ -36,7 +36,7 @@ class SettingsManager(QtCore.QSettings):
         return self.value("ui/smallCornerRadius",5)
 
     def getRoundingRadiusMed(self):
-        return self.value("ui/medlCornerRadius",2)
+        return self.value("ui/medCornerRadius",2)
 
     def getRoundingRadiusBig(self):
         return self.value("ui/bigCornerRadius",10)
@@ -183,18 +183,18 @@ class SettingsManager(QtCore.QSettings):
             """)
 
     def createConfigFile(self):
-        self.setValue("ui/smallCornerRadius",5)
-        self.setValue("ui/medlCornerRadius",2)
-        self.setValue("ui/bigCornerRadius",10)
-        self.setValue("ui/bigBorderRadius",3)
-        self.setValue("ui/medBorderRadius",3)
-        self.setValue("ui/smallBorderRadius",1)
-        self.setValue("ui/backgroundColor","161217")
-        self.setValue("ui/surfaceColor","161217")
-        self.setValue("ui/onSurfaceColor","e8e0e8")   
-        self.setValue("ui/onBackgroundColor","e8e0e8")   
-        self.setValue("ui/errorColor","ffb4ab")   
-        self.setValue("ui/primaryColor","deb8f7")   
-        self.setValue("ui/primaryOnColor","402357")   
-        self.setValue("ui/secondaryColor","2d2433")   
-        self.setValue("ui/secondaryOnColor","d1c1d9")   
+        self.setValue("ui/smallCornerRadius",self.getRoundingRadiusSmall())
+        self.setValue("ui/medCornerRadius",self.getRoundingRadiusMed())
+        self.setValue("ui/bigCornerRadius",self.getRoundingRadiusBig())
+        self.setValue("ui/bigBorderRadius",self.getBorderRadiusBig())
+        self.setValue("ui/medBorderRadius",self.getBorderRadiusMed())
+        self.setValue("ui/smallBorderRadius",self.getBorderRadiusSmall())
+        self.setValue("ui/backgroundColor",self.getColorBackground())
+        self.setValue("ui/surfaceColor",self.getColorSurface())
+        self.setValue("ui/onSurfaceColor",self.getColorOnSurface())   
+        self.setValue("ui/onBackgroundColor",self.getColorOnBackground())   
+        self.setValue("ui/errorColor",self.getColorError())   
+        self.setValue("ui/primaryColor",self.getColorPrimary())   
+        self.setValue("ui/primaryOnColor",self.getColorOnPrimary())   
+        self.setValue("ui/secondaryColor",self.getColorSecondary())   
+        self.setValue("ui/secondaryOnColor",self.getColorOnSecondary())   
