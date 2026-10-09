@@ -2,8 +2,8 @@ from PySide6 import QtCore, QtWidgets
 from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import QVBoxLayout
 
-import ggraph.HistoryLine
-import ggraph.HistoryManager
+from ggraph.HistoryLine import HistoryLine
+from ggraph.HistoryManager import HistoryManager
 
 
 class CalculatorView(QtWidgets.QWidget):
@@ -13,7 +13,7 @@ class CalculatorView(QtWidgets.QWidget):
         self.settings = settings
 
         self.mathsBox = QtWidgets.QLineEdit("")
-        self.historyManager = ggraph.HistoryManager.HistoryManager()
+        self.historyManager = HistoryManager()
         self.submitMath = QtWidgets.QPushButton("Submit Math")
         self.historyScroller = QtWidgets.QScrollArea()
         self.historyHolder = QtWidgets.QFrame()
@@ -46,7 +46,7 @@ class CalculatorView(QtWidgets.QWidget):
 
         self.mathsBox.setFocus()
 
-        newHistoryRow = ggraph.HistoryLine.HistoryLine(text,parsedResult[0])
+        newHistoryRow = HistoryLine(text,parsedResult[0])
         newHistoryRow.themeOutputLabel(parsedResult[1])
         self.historyHolder.layout().addWidget(newHistoryRow)
         self.historyManager.addToCalcHistory(text)
