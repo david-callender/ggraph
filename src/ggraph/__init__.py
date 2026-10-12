@@ -3,6 +3,17 @@ import sys
 
 from PySide6 import QtCore, QtWidgets
 
+from ggraph.interpreter import Env, interpret
+from ggraph.tokens import (
+    Token,
+    TokenAdd,
+    TokenFuncCall,
+    TokenFuncDef,
+    TokenMul,
+    TokenNumLit,
+    TokenVar,
+)
+
 
 class MyWidget(QtWidgets.QWidget):
     def __init__(self):
@@ -27,10 +38,38 @@ class MyWidget(QtWidgets.QWidget):
 
 
 def main() -> None:
-    app = QtWidgets.QApplication([])
+    # F(x) = 2x
+    f_func_body: list[Token] = [TokenNumLit(2), TokenVar("x"), TokenMul()]
+    f_func_body.reverse()
 
-    widget = MyWidget()
-    widget.resize(800, 600)
-    widget.show()
+    # G(x) = 5x + 2
+    g_func_body: list[Token] = [
+        TokenNumLit(5),
+        TokenVar("x"),
+        TokenMul(),
+        TokenNumLit(2),
+        TokenAdd(),
+    ]
+    g_func_body.reverse()
 
-    sys.exit(app.exec())
+    # F(G(4))
+
+    program: list[Token] = [
+        TokenFuncDef("F", ["x"], f_func_body),
+        TokenFuncDef("G", ["x"], g_func_body),
+        TokenNumLit(4),
+        TokenFuncCall("G", 1),
+        TokenFuncCall("F", 1),
+    ]
+
+    program.reverse()
+
+    print(interpret(program, Env(None)))
+
+    # app = QtWidgets.QApplication([])
+
+    # widget = MyWidget()
+    # widget.resize(800, 600)
+    # widget.show()
+
+    # sys.exit(app.exec())
