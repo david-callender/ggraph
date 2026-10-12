@@ -138,8 +138,9 @@ class TokenVar:
     tag = TokenType.Var
     name: str
 
-    def __init__(self):
+    def __init__(self, name: str):
         self.tag = TokenType.Var
+        self.name = name
 
 
 class TokenAdd:
