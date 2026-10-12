@@ -3,6 +3,11 @@ from typing import Literal
 type Num = int | float
 
 
+class LexemeAssociativity:
+    Left: Literal[0] = 0
+    Right: Literal[1] = 1
+
+
 class LexemeType:
     NumLit: Literal[0] = 0
     Name: Literal[1] = 1
@@ -37,6 +42,8 @@ class LexemeName:
 
 class LexemePlus:
     tag = LexemeType.Plus
+    precedence: int = 10
+    associativity = LexemeAssociativity.Left
 
     def __init__(self):
         self.tag = LexemeType.Plus
@@ -44,6 +51,8 @@ class LexemePlus:
 
 class LexemeMinus:
     tag = LexemeType.Minus
+    precedence: int = 10
+    associativity = LexemeAssociativity.Left
 
     def __init__(self):
         self.tag = LexemeType.Minus
@@ -51,6 +60,8 @@ class LexemeMinus:
 
 class LexemeStar:
     tag = LexemeType.Star
+    precedence: int = 20
+    associativity = LexemeAssociativity.Left
 
     def __init__(self):
         self.tag = LexemeType.Star
@@ -58,6 +69,8 @@ class LexemeStar:
 
 class LexemeSlash:
     tag = LexemeType.Slash
+    precedence: int = 20
+    associativity = LexemeAssociativity.Left
 
     def __init__(self):
         self.tag = LexemeType.Slash
@@ -65,6 +78,8 @@ class LexemeSlash:
 
 class LexemeCaret:
     tag = LexemeType.Caret
+    precedence: int = 30
+    associativity = LexemeAssociativity.Right
 
     def __init__(self):
         self.tag = LexemeType.Caret
