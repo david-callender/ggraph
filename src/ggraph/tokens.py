@@ -1,7 +1,5 @@
 from typing import Literal
 
-type Num = int | float
-
 
 class LexemeType:
     NumLit: Literal[0] = 0
@@ -19,7 +17,7 @@ class LexemeType:
 
 class LexemeNumLit:
     tag = LexemeType.NumLit
-    value: Num
+    value: float
 
     def __init__(self, value):
         self.tag = LexemeType.NumLit
@@ -114,22 +112,23 @@ type Lexeme = (
 
 
 class TokenType:
-    NumLit: Literal[1] = 1
-    Var: Literal[2] = 2
-    Add: Literal[3] = 3
-    Sub: Literal[4] = 4
-    Mul: Literal[5] = 5
-    Div: Literal[6] = 6
-    Pow: Literal[7] = 7
-    FuncCall: Literal[8] = 8
+    NumLit: Literal[0] = 0
+    Var: Literal[1] = 1
+    Add: Literal[2] = 2
+    Sub: Literal[3] = 3
+    Mul: Literal[4] = 4
+    Div: Literal[5] = 5
+    Pow: Literal[6] = 6
+    FuncCall: Literal[7] = 7
+    FuncEnd: Literal[8] = 8
     FuncDef: Literal[9] = 9
 
 
 class TokenNumLit:
     tag = TokenType.NumLit
-    value: Num
+    value: float
 
-    def __init__(self, value: Num):
+    def __init__(self, value: float):
         self.tag = TokenType.NumLit
         self.value = value
 
@@ -138,8 +137,9 @@ class TokenVar:
     tag = TokenType.Var
     name: str
 
-    def __init__(self):
+    def __init__(self, name: str):
         self.tag = TokenType.Var
+        self.name = name
 
 
 class TokenAdd:
@@ -188,14 +188,23 @@ class TokenFuncCall:
         self.num_args = num_args
 
 
+class TokenFuncEnd:
+    tag = TokenType.FuncEnd
+
+    def __init__(self):
+        self.tag = TokenType.FuncEnd
+
 class TokenFuncDef:
     tag = TokenType.FuncDef
     name: str
     args: list[str]
     body: list[Token]
 
-    def __init__(self):
+    def __init__(self, name: str, args: list[str], body: list[Token]):
         self.tag = TokenType.FuncDef
+        self.name = name
+        self.args = args
+        self.body = body
 
 
 type Token = (
@@ -207,5 +216,6 @@ type Token = (
     | TokenDiv
     | TokenPow
     | TokenFuncCall
+    | TokenFuncEnd
     | TokenFuncDef
 )
