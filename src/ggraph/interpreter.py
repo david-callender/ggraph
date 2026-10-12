@@ -43,24 +43,13 @@ class Env:
             env = env.parent
 
 
-def pop_none[T](l: list[T]) -> T | None:
-    if len(l) == 0:
-        return None
-    return l.pop()
-
-
 def interpret(program: list[Token], start_env: Env) -> float:
     stack = []
 
     env = start_env
 
-    token = pop_none(program)
-
-    while token is not None:
-        print(program)
-        print(token)
-        print(stack)
-        print()
+    while len(program) != 0:
+        token = program.pop()
         match token.tag:
             case TokenType.NumLit:
                 stack.append(token.value)
@@ -119,8 +108,6 @@ def interpret(program: list[Token], start_env: Env) -> float:
 
             case _:
                 assert_never(token.tag)
-
-        token = pop_none(program)
 
     result = stack[0]
     return result
