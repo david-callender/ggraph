@@ -1,3 +1,4 @@
+from collections.abc import Iterator
 from more_itertools import peekable
 
 from ggraph.tokens import (
@@ -23,10 +24,10 @@ class LexerError(Exception):
 class Lexer:
     expression: peekable
 
-    def __init__(self, expression: str):
+    def __init__(self, expression: str) -> None:
         self.expression = peekable(expression.replace(" ", ""))
 
-    def __iter__(self) -> Lexer:
+    def __iter__(self) -> Iterator[Lexeme]:
         return self
 
     def __next__(self) -> Lexeme:

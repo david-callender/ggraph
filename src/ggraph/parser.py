@@ -1,6 +1,6 @@
 from ggraph.lexer import *
 from ggraph.tokens import *
-from collections.abc import Iterable
+from collections.abc import Iterable, Iterator
 from more_itertools import peekable
 
 
@@ -32,13 +32,13 @@ class Parser:
     output: list[Token]
     last_func_args: int
 
-    def __init__(self, lexeme_stream: Iterable[Lexeme]):
+    def __init__(self, lexeme_stream: Iterable[Lexeme]) -> None:
         self.lexeme_stream = peekable(lexeme_stream)
         self.stack = []
         self.output = []
         self.last_func_args = 1
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Token]:
         stream = self.parse()
         return iter(stream)
 
@@ -70,7 +70,7 @@ class Parser:
 
         return self.output
 
-    def parse_name(self, lexeme: LexemeName):
+    def parse_name(self, lexeme: LexemeName) -> None:
         if lexeme.value[0].isupper():
             if (
                 # We raise a ParserError if there is a function call not followed by parens
@@ -85,14 +85,14 @@ class Parser:
             # ... vars go straight to the output
             self.output.append(TokenVar(lexeme.value))
 
-    def parse_comma(self):
+    def parse_comma(self) -> None:
         try:
             self.slurp_paren()
             self.last_func_args += 1
         except IndexError:
             raise ParserError("Comma placed outside of parentheses")
 
-    def parse_close_paren(self):
+    def parse_close_paren(self) -> None:
         try:
             self.slurp_paren()
             if self.stack.pop().tag != LexemeType.OpenParen:
@@ -112,17 +112,17 @@ class Parser:
         except IndexError:
             raise ParserError("Mismatched parentheses")
 
-    def parse_op(self, lexeme: LexemeOp):
+    def parse_op(self, lexeme: LexemeOp) -> None:
         while self.stack_has_precedence(lexeme):
             self.output.append(lexeme_to_token(self.stack.pop()))
 
         self.stack.append(lexeme)
 
-    def slurp_paren(self):
+    def slurp_paren(self) -> None:
         while self.stack[-1].tag != LexemeType.OpenParen:
             self.output.append(lexeme_to_token(self.stack.pop()))
 
-    def stack_has_precedence(self, op: LexemeOp):
+    def stack_has_precedence(self, op: LexemeOp) -> bool:
         # If there's nothing on the stack, it doesn't have precedence
         if not self.stack:
             return False
