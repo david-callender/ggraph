@@ -25,7 +25,6 @@ class LexemeNumLit:
     value: float
 
     def __init__(self, value):
-        self.tag = LexemeType.NumLit
         self.value = value
 
 
@@ -34,81 +33,53 @@ class LexemeName:
     value: str
 
     def __init__(self, value):
-        self.tag = LexemeType.Name
         self.value = value
 
 
 class LexemePlus:
     tag = LexemeType.Plus
-    precedence: int = 10
+    precedence = 10
     associativity = LexemeAssociativity.Left
-
-    def __init__(self):
-        self.tag = LexemeType.Plus
 
 
 class LexemeMinus:
     tag = LexemeType.Minus
-    precedence: int = 10
+    precedence = 10
     associativity = LexemeAssociativity.Left
-
-    def __init__(self):
-        self.tag = LexemeType.Minus
 
 
 class LexemeStar:
     tag = LexemeType.Star
-    precedence: int = 20
+    precedence = 20
     associativity = LexemeAssociativity.Left
-
-    def __init__(self):
-        self.tag = LexemeType.Star
 
 
 class LexemeSlash:
     tag = LexemeType.Slash
-    precedence: int = 20
+    precedence = 20
     associativity = LexemeAssociativity.Left
-
-    def __init__(self):
-        self.tag = LexemeType.Slash
 
 
 class LexemeCaret:
     tag = LexemeType.Caret
-    precedence: int = 30
+    precedence = 30
     associativity = LexemeAssociativity.Right
-
-    def __init__(self):
-        self.tag = LexemeType.Caret
 
 
 class LexemeOpenParen:
     tag = LexemeType.OpenParen
 
-    def __init__(self):
-        self.tag = LexemeType.OpenParen
-
 
 class LexemeCloseParen:
     tag = LexemeType.CloseParen
-
-    def __init__(self):
-        self.tag = LexemeType.CloseParen
 
 
 class LexemeComma:
     tag = LexemeType.Comma
 
-    def __init__(self):
-        self.tag = LexemeType.Comma
-
 
 class LexemeEq:
     tag = LexemeType.Eq
-
-    def __init__(self):
-        self.tag = LexemeType.Eq
 
 
 type Lexeme = (
@@ -144,7 +115,6 @@ class TokenNumLit:
     value: float
 
     def __init__(self, value: float):
-        self.tag = TokenType.NumLit
         self.value = value
 
 
@@ -153,43 +123,27 @@ class TokenVar:
     name: str
 
     def __init__(self, name: str):
-        self.tag = TokenType.Var
         self.name = name
 
 
 class TokenAdd:
     tag = TokenType.Add
 
-    def __init__(self):
-        self.tag = TokenType.Add
-
 
 class TokenSub:
     tag = TokenType.Sub
-
-    def __init__(self):
-        self.tag = TokenType.Sub
 
 
 class TokenMul:
     tag = TokenType.Mul
 
-    def __init__(self):
-        self.tag = TokenType.Mul
-
 
 class TokenDiv:
     tag = TokenType.Div
 
-    def __init__(self):
-        self.tag = TokenType.Div
-
 
 class TokenPow:
     tag = TokenType.Pow
-
-    def __init__(self):
-        self.tag = TokenType.Pow
 
 
 class TokenFuncCall:
@@ -198,7 +152,6 @@ class TokenFuncCall:
     num_args: int
 
     def __init__(self, name: str, num_args: int):
-        self.tag = TokenType.FuncCall
         self.name = name
         self.num_args = num_args
 
@@ -206,8 +159,6 @@ class TokenFuncCall:
 class TokenFuncEnd:
     tag = TokenType.FuncEnd
 
-    def __init__(self):
-        self.tag = TokenType.FuncEnd
 
 class TokenFuncDef:
     tag = TokenType.FuncDef
@@ -216,7 +167,6 @@ class TokenFuncDef:
     body: list[Token]
 
     def __init__(self, name: str, args: list[str], body: list[Token]):
-        self.tag = TokenType.FuncDef
         self.name = name
         self.args = args
         self.body = body
