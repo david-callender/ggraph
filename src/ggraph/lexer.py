@@ -2,8 +2,6 @@ from more_itertools import peekable
 
 from ggraph.tokens import (
     Lexeme,
-    LexemeType,
-    LexemeAssociativity,
     LexemeNumLit,
     LexemeName,
     LexemePlus,
@@ -19,11 +17,7 @@ from ggraph.tokens import (
 
 
 class LexerError(Exception):
-    message: str
-
-    def __init__(self, message: str):
-        self.message = message
-        super().__init__(self.message)
+    pass
 
 
 class Lexer:
