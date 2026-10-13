@@ -61,27 +61,27 @@ def interpret(program: list[Token], start_env: Env) -> float:
             case TokenType.Add:
                 a = stack.pop()
                 b = stack.pop()
-                stack.append(a + b)
+                stack.append(b + a)
 
             case TokenType.Sub:
                 a = stack.pop()
                 b = stack.pop()
-                stack.append(a - b)
+                stack.append(b - a)
 
             case TokenType.Mul:
                 a = stack.pop()
                 b = stack.pop()
-                stack.append(a * b)
+                stack.append(b * a)
 
             case TokenType.Div:
                 a = stack.pop()
                 b = stack.pop()
-                stack.append(a / b)
+                stack.append(b / a)
 
             case TokenType.Pow:
                 a = stack.pop()
                 b = stack.pop()
-                stack.append(a**b)
+                stack.append(b**a)
 
             case TokenType.FuncCall:
                 func_object = env.search_funcs(token.name)

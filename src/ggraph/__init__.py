@@ -1,9 +1,12 @@
 import random
 import sys
+import time
 
 from PySide6 import QtCore, QtWidgets
 
 from ggraph.interpreter import Env, interpret
+from ggraph.lexer import Lexer
+from ggraph.parser import Parser
 from ggraph.tokens import (
     Token,
     TokenAdd,
@@ -38,33 +41,19 @@ class MyWidget(QtWidgets.QWidget):
 
 
 def main() -> None:
-    # F(x) = 2x
-    f_func_body: list[Token] = [TokenNumLit(2), TokenVar("x"), TokenMul()]
-    f_func_body.reverse()
+    time_start = time.time()
+    l = Lexer("6 * (5 + 7) / 4 - 7 * 2 + 3 * 3")
+    p = Parser(l)
+    parsed = p.parse()
+    print(parsed)
+    parsed.reverse()
+    for i in range(1000000):
+        env = Env(None)
+        result = interpret(parsed[::], env)
+        assert result == 13
 
-    # G(x) = 5x + 2
-    g_func_body: list[Token] = [
-        TokenNumLit(5),
-        TokenVar("x"),
-        TokenMul(),
-        TokenNumLit(2),
-        TokenAdd(),
-    ]
-    g_func_body.reverse()
-
-    # F(G(4))
-
-    program: list[Token] = [
-        TokenFuncDef("F", ["x"], f_func_body),
-        TokenFuncDef("G", ["x"], g_func_body),
-        TokenNumLit(4),
-        TokenFuncCall("G", 1),
-        TokenFuncCall("F", 1),
-    ]
-
-    program.reverse()
-
-    print(interpret(program, Env(None)))
+    time_delta = time.time() - time_start
+    print(time_delta)
 
     # app = QtWidgets.QApplication([])
 

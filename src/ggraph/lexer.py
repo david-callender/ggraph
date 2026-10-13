@@ -81,7 +81,7 @@ class Lexer:
     def lex_num_literal(self) -> tokens.LexemeNumLit:
         next_char = self.expression[self.idx]
         num_str: str = ""
-        num: tokens.Num = 0
+        num: float = 0
         is_float: bool = False
 
         while next_char.isnumeric() or next_char == ".":
