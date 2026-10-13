@@ -32,6 +32,10 @@ class SettingsManager(QtCore.QSettings):
         self.setupTheme()
             
 
+
+    def useSystemTheme(self):
+        return self.value("ui/useSystemTheme", "true") == "true"
+
     def getRoundingRadiusSmall(self):
         return self.value("ui/smallCornerRadius",5)
 
@@ -79,6 +83,10 @@ class SettingsManager(QtCore.QSettings):
 
 
     def setupTheme(self):
+        if self.useSystemTheme():
+            self.app.setStyleSheet("")
+            return
+        
         self.app.setStyleSheet(f"""
                 QWidget {{
                     background-color: #{self.getColorBackground()};
@@ -183,6 +191,9 @@ class SettingsManager(QtCore.QSettings):
             """)
 
     def createConfigFile(self):
+
+        self.setValue("ui/useSystemTheme",self.useSystemTheme())   
+
         self.setValue("ui/smallCornerRadius",self.getRoundingRadiusSmall())
         self.setValue("ui/medCornerRadius",self.getRoundingRadiusMed())
         self.setValue("ui/bigCornerRadius",self.getRoundingRadiusBig())
