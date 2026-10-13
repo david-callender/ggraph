@@ -14,5 +14,4 @@ def main() -> None:
     settings.setupTheme()
     widget.resize(800, 600)
     widget.show()
-
     sys.exit(app.exec())
