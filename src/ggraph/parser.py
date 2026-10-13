@@ -1,5 +1,7 @@
 from ggraph.lexer import *
 from ggraph.tokens import *
+from collections.abc import Iterable
+from more_itertools import peekable
 
 
 def lexeme_to_token(lexeme: Lexeme) -> Token:
@@ -29,13 +31,13 @@ class ParserError(Exception):
 
 
 class Parser:
-    lexeme_stream: Lexer
+    lexeme_stream: peekable[Lexeme]
     stack: list[Lexeme]
     output: list[Token]
     last_func_args: int
 
-    def __init__(self, lexeme_stream: Lexer):
-        self.lexeme_stream = lexeme_stream
+    def __init__(self, lexeme_stream: Iterable[Lexeme]):
+        self.lexeme_stream = peekable(lexeme_stream)
         self.stack = []
         self.output = []
         self.last_func_args = 1
@@ -61,7 +63,10 @@ class Parser:
                 # All of the special operators have now been dealt with,
                 # and we can parse the regular operators.
                 case _:
-                    self.parse_op(lexeme)
+                    # Here it is safe to assume, as we have already checked for any other
+                    # lexeme types, that lexeme is a LexemeOp. Thus, we change its type.
+                    op: LexemeOp = lexeme
+                    self.parse_op(op)
 
         for lexeme in self.stack[::-1]:
             # Only simple operators should be left by now.
@@ -74,7 +79,7 @@ class Parser:
             if (
                 # We raise a ParserError if there is a function call not followed by parens
                 # (it's at the end of the stream, or followed by anything other than a openparen)
-                self.lexeme_stream.peek() == None
+                self.lexeme_stream.peek(None) == None
                 or self.lexeme_stream.peek().tag != LexemeType.OpenParen
             ):
                 raise ParserError("Function call is missing parentheses")
@@ -103,32 +108,43 @@ class Parser:
             if self.stack and self.stack[-1].tag == LexemeType.Name:
                 # ty really doesn't like this but I don't know a way to signal that this
                 # only happens if self.stack.pop().value is guaranteed to be a LexemeName
-                self.output.append(
-                    TokenFuncCall(self.stack.pop().value, self.last_func_args)
-                )
+                stack_top: LexemeName = self.stack.pop()
+                self.output.append(TokenFuncCall(stack_top.value, self.last_func_args))
                 self.last_func_args = 1
             elif self.last_func_args != 1:
                 raise ParserError("Comma inside non-function call")
         except IndexError:
             raise ParserError("Mismatched parentheses")
 
-    def parse_op(self, lexeme: Lexeme):
-        # ty doesn't like this, even though this should only ever encounter operators with
-        # the required properties as all others will have been parsed
-        while (
-            self.stack
-            and self.stack[-1].tag != LexemeType.OpenParen
-            and (
-                self.stack[-1].precedence > lexeme.precedence
-                or (
-                    self.stack[-1].precedence == lexeme.precedence
-                    and self.stack[-1].associativity == LexemeAssociativity.Left
-                )
-            )
-        ):
+    def parse_op(self, lexeme: LexemeOp):
+        while self.stack_has_precedence(lexeme):
             self.output.append(lexeme_to_token(self.stack.pop()))
+
         self.stack.append(lexeme)
 
     def slurp_paren(self):
         while self.stack[-1].tag != LexemeType.OpenParen:
             self.output.append(lexeme_to_token(self.stack.pop()))
+
+    def stack_has_precedence(self, op: LexemeOp):
+        # If there's nothing on the stack, it doesn't have precedence
+        if not self.stack:
+            return False
+
+        stack_top = self.stack[-1]
+
+        if stack_top.tag == LexemeType.OpenParen:
+            return False
+
+        # Now it is safe to assume that the lexeme is an operator, as other prior functions
+        # will have made sure that a name will not be found above its corresponding
+        # left paren on the stack, so we change its type here via a self-assignment
+        stack_top_op: LexemeOp = stack_top
+
+        if stack_top_op.precedence > op.precedence:
+            return True
+
+        return (
+            stack_top_op.precedence == op.precedence
+            and stack_top_op.associativity == LexemeAssociativity.Left
+        )

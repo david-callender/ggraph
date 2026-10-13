@@ -1,4 +1,21 @@
-from ggraph import tokens
+from more_itertools import peekable
+
+from ggraph.tokens import (
+    Lexeme,
+    LexemeType,
+    LexemeAssociativity,
+    LexemeNumLit,
+    LexemeName,
+    LexemePlus,
+    LexemeMinus,
+    LexemeStar,
+    LexemeSlash,
+    LexemeCaret,
+    LexemeOpenParen,
+    LexemeCloseParen,
+    LexemeComma,
+    LexemeEq,
+)
 
 
 class LexerError(Exception):
@@ -10,109 +27,85 @@ class LexerError(Exception):
 
 
 class Lexer:
-    expression: str
-    idx: int  # Strings are iterable but do not have a peeking implementation needed for some lexing functions
-    cache: tokens.Lexeme | None
+    expression: peekable
 
     def __init__(self, expression: str):
-        self.expression = expression.replace(" ", "")
-        self.idx = 0
-        self.cache = self.next_tok()
+        self.expression = peekable(expression.replace(" ", ""))
 
     def __iter__(self) -> Lexer:
         return self
 
-    def __next__(self) -> tokens.Lexeme:
-        ret: tokens.Lexeme
-        if self.cache == None:
-            raise StopIteration
-        else:
-            ret = self.cache
+    def __next__(self) -> Lexeme:
+        return self.next_tok()
 
-        if self.idx >= len(self.expression):
-            self.cache = None
-        else:
-            self.cache = self.next_tok()
+    def next_tok(self) -> Lexeme:
+        next_char = self.expression.peek()
 
-        return ret
-
-    def peek(self) -> tokens.Lexeme | None:
-        return self.cache
-
-    def next_tok(self) -> tokens.Lexeme:
-        next_char = self.expression[self.idx]
-
-        if self.expression[self.idx].isnumeric():
+        if next_char.isnumeric():
             return self.lex_num_literal()
-        elif self.expression[self.idx].isalpha():
+        elif next_char.isalpha():
             return self.lex_name()
 
         match next_char:
             case "+":
-                self.idx += 1
-                return tokens.LexemePlus()
+                next(self.expression)
+                return LexemePlus()
             case "-":
-                self.idx += 1
-                return tokens.LexemeMinus()
+                next(self.expression)
+                return LexemeMinus()
             case "*":
-                self.idx += 1
-                return tokens.LexemeStar()
+                next(self.expression)
+                return LexemeStar()
             case "/":
-                self.idx += 1
-                return tokens.LexemeSlash()
+                next(self.expression)
+                return LexemeSlash()
             case "^":
-                self.idx += 1
-                return tokens.LexemeCaret()
+                next(self.expression)
+                return LexemeCaret()
             case "(":
-                self.idx += 1
-                return tokens.LexemeOpenParen()
+                next(self.expression)
+                return LexemeOpenParen()
             case ")":
-                self.idx += 1
-                return tokens.LexemeCloseParen()
+                next(self.expression)
+                return LexemeCloseParen()
             case ",":
-                self.idx += 1
-                return tokens.LexemeComma()
+                next(self.expression)
+                return LexemeComma()
             case "=":
-                self.idx += 1
-                return tokens.LexemeEq()
+                next(self.expression)
+                return LexemeEq()
 
         raise LexerError(f"Invalid character in math expression: {next_char}")
 
-    def lex_num_literal(self) -> tokens.LexemeNumLit:
-        next_char = self.expression[self.idx]
+    def lex_num_literal(self) -> LexemeNumLit:
+        next_char: str = self.expression.peek()
         num_str: str = ""
-        num: float = 0
+        num: float
         is_float: bool = False
 
-        while next_char.isnumeric() or next_char == ".":
+        while next_char and (next_char.isnumeric() or next_char == "."):
+            next(self.expression)
             if next_char == "." and (not is_float):
                 is_float = True
             elif next_char == "." and is_float:
                 raise LexerError("Numbers may have at most one decimal point")
             num_str += next_char
-            self.idx += 1
-            if self.idx < len(self.expression):
-                next_char = self.expression[self.idx]
-            else:
-                break  # End the loop when we've hit the end of the expression
+            next_char: str | None = self.expression.peek(None)
 
         if is_float:
             num = float(num_str)
         else:
             num = int(num_str)
 
-        return tokens.LexemeNumLit(num)
+        return LexemeNumLit(num)
 
-    def lex_name(self) -> tokens.LexemeName:
-        next_char = self.expression[self.idx]
+    def lex_name(self) -> LexemeName:
+        next_char: str | None = self.expression.peek()
         name: str = ""
 
-        while next_char.isalpha():
+        while next_char and next_char.isalpha():
+            next(self.expression)
             name += next_char
-            self.idx += 1
-            if self.idx < len(self.expression):
-                next_char = self.expression[self.idx]
-            else:
-                break  # End the loop when we've hit the end of the expression
+            next_char: str | None = self.expression.peek(None)
 
-        return tokens.LexemeName(name)
+        return LexemeName(name)
