@@ -23,7 +23,7 @@ class CalculatorView(QtWidgets.QWidget):
         self.historyHolder = QtWidgets.QFrame()
         self.scrollbar = self.historyScroller.verticalScrollBar()
 
-        self.historyLayout: QVBoxLayout = QVBoxLayout(self.historyHolder)
+        self.historyLayout = QVBoxLayout(self.historyHolder)
         self.historyLayout.addStretch()
         self.historyLayout.setAlignment(QtCore.Qt.AlignmentFlag.AlignBottom)
 
