@@ -3,7 +3,7 @@ from typing import assert_never
 from ggraph.tokens import Token, TokenFuncEnd, TokenType
 
 
-class GGraphException(Exception):
+class InterpreterError(Exception):
     pass
 
 
@@ -86,7 +86,7 @@ def interpret(program: list[Token], start_env: Env) -> float:
             case TokenType.FuncCall:
                 func_object = env.search_funcs(token.name)
                 if func_object is None:
-                    raise GGraphException(f"Failed to find function {token.name}")
+                    raise InterpreterError(f"Failed to find function {token.name}")
 
                 new_env = Env(env)
                 for arg in func_object.args:
@@ -99,7 +99,7 @@ def interpret(program: list[Token], start_env: Env) -> float:
 
             case TokenType.FuncEnd:
                 if env.parent is None:
-                    raise GGraphException("missaligned env stack")
+                    raise InterpreterError("missaligned env stack")
                 env = env.parent
 
             case TokenType.FuncDef:
