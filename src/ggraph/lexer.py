@@ -73,10 +73,10 @@ class Lexer:
         raise LexerError(f"Invalid character in math expression: {next_char}")
 
     def lex_num_literal(self) -> LexemeNumLit:
-        next_char: str = self.expression.peek()
-        num_str: str = ""
+        next_char = self.expression.peek()
+        num_str = ""
         num: float
-        is_float: bool = False
+        is_float = False
 
         while next_char and (next_char.isnumeric() or next_char == "."):
             next(self.expression)
@@ -95,8 +95,8 @@ class Lexer:
         return LexemeNumLit(num)
 
     def lex_name(self) -> LexemeName:
-        next_char: str | None = self.expression.peek()
-        name: str = ""
+        next_char = self.expression.peek()
+        name = ""
 
         while next_char and next_char.isalpha():
             next(self.expression)
