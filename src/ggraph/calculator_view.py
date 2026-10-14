@@ -11,7 +11,7 @@ from ggraph.settings_manager import SettingsManager
 
 
 class CalculatorView(QtWidgets.QWidget):
-    def __init__(self, settings: SettingsManager):
+    def __init__(self, settings: SettingsManager) -> None:
         super().__init__()
 
         self.settings = settings
@@ -23,9 +23,9 @@ class CalculatorView(QtWidgets.QWidget):
         self.historyHolder = QtWidgets.QFrame()
         self.scrollbar = self.historyScroller.verticalScrollBar()
 
-        historyLayout = QVBoxLayout(self.historyHolder)
-        historyLayout.addStretch()
-        historyLayout.setAlignment(QtCore.Qt.AlignmentFlag.AlignBottom)
+        self.historyLayout: QVBoxLayout = QVBoxLayout(self.historyHolder)
+        self.historyLayout.addStretch()
+        self.historyLayout.setAlignment(QtCore.Qt.AlignmentFlag.AlignBottom)
 
         self.historyScroller.setWidget(self.historyHolder)
         self.historyScroller.setWidgetResizable(True)
@@ -41,7 +41,7 @@ class CalculatorView(QtWidgets.QWidget):
 
         self.mathsBox.setFocus()
 
-    def parseMath(self, input: str):
+    def parseMath(self, input: str) -> tuple[str,bool]:
         l = Lexer(input)
         p = Parser(l).parse()
         p.reverse()
@@ -52,7 +52,7 @@ class CalculatorView(QtWidgets.QWidget):
 
 
     @QtCore.Slot()
-    def submitMath(self):
+    def submitMath(self) -> None:
         text = self.mathsBox.text()
 
         parsedResult = self.parseMath(text) # A tuple of a string representing the output, and a Boolean that is True if an error ocurred.
@@ -61,7 +61,7 @@ class CalculatorView(QtWidgets.QWidget):
 
         newHistoryRow = HistoryLine(text,parsedResult[0])
         newHistoryRow.themeOutputLabel(parsedResult[1])
-        self.historyHolder.layout().addWidget(newHistoryRow)
+        self.historyLayout.addWidget(newHistoryRow)
         self.historyManager.addToCalcHistory(text)
         self.historyManager.addToCalcHistory(parsedResult[0])
 
@@ -72,7 +72,7 @@ class CalculatorView(QtWidgets.QWidget):
 
         print(text + ": " + parsedResult[0])
 
-    def setupKeybinds(self):
+    def setupKeybinds(self) -> None:
 
         self.submitMathButton.setShortcut(QKeySequence("Return"))
         self.nextHistory = QShortcut(QKeySequence("Up"), self)
@@ -90,9 +90,9 @@ class CalculatorView(QtWidgets.QWidget):
         self.previousHistory.activated.connect(self.applyPreviousHistoryItem)
 
 
-    def applyNextHistoryItem(self):
+    def applyNextHistoryItem(self) -> None:
         self.mathsBox.setText(self.historyManager.getNextHistoryItem())
 
-    def applyPreviousHistoryItem(self):
+    def applyPreviousHistoryItem(self) -> None:
         self.mathsBox.setText(self.historyManager.getPreviousHistoryItem())
 

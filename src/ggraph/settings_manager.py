@@ -5,7 +5,7 @@ from PySide6.QtCore import QFileSystemWatcher
 
 
 class SettingsManager(QtCore.QSettings):
-    def __init__(self,app: QtWidgets.QApplication):
+    def __init__(self,app: QtWidgets.QApplication) -> None:
         super().__init__("Social-Coding", "GGraph")
         self.app = app
 
@@ -21,7 +21,7 @@ class SettingsManager(QtCore.QSettings):
 
         self.reloadConfig()
 
-    def reloadConfig(self):
+    def reloadConfig(self) -> None:
         self.sync()
 
         print("Reloading Config from File")
@@ -33,56 +33,56 @@ class SettingsManager(QtCore.QSettings):
             
 
 
-    def useSystemTheme(self):
+    def useSystemTheme(self) -> bool:
         return self.value("ui/useSystemTheme", "true") == "true"
 
-    def getRoundingRadiusSmall(self):
-        return self.value("ui/smallCornerRadius",5)
+    def getRoundingRadiusSmall(self) -> str:
+        return str(self.value("ui/smallCornerRadius",5))
 
-    def getRoundingRadiusMed(self):
-        return self.value("ui/medCornerRadius",2)
+    def getRoundingRadiusMed(self) -> str:
+        return str(self.value("ui/medCornerRadius",2))
 
-    def getRoundingRadiusBig(self):
-        return self.value("ui/bigCornerRadius",10)
+    def getRoundingRadiusBig(self) -> str:
+        return str(self.value("ui/bigCornerRadius",10))
 
-    def getBorderRadiusBig(self):
-        return self.value("ui/bigBorderRadius",3)
+    def getBorderRadiusBig(self) -> str:
+        return str(self.value("ui/bigBorderRadius",3))
 
-    def getBorderRadiusMed(self):
-        return self.value("ui/medBorderRadius",2)
+    def getBorderRadiusMed(self) -> str:
+        return str(self.value("ui/medBorderRadius",2))
 
-    def getBorderRadiusSmall(self):
-        return self.value("ui/smallBorderRadius",1)
+    def getBorderRadiusSmall(self) -> str:
+        return str(self.value("ui/smallBorderRadius",1))
 
-    def getColorBackground(self):
-        return self.value("ui/backgroundColor","161217")
+    def getColorBackground(self) -> str:
+        return str(self.value("ui/backgroundColor","161217"))
 
-    def getColorSurface(self):
-        return self.value("ui/surfaceColor","161217")
+    def getColorSurface(self) -> str:
+        return str(self.value("ui/surfaceColor","161217"))
 
-    def getColorOnSurface(self):
-        return self.value("ui/onSurfaceColor","e8e0e8")   
+    def getColorOnSurface(self) -> str:
+        return str(self.value("ui/onSurfaceColor","e8e0e8")   )
 
-    def getColorOnBackground(self):
-        return self.value("ui/onBackgroundColor","e8e0e8")   
+    def getColorOnBackground(self) -> str:
+        return str(self.value("ui/onBackgroundColor","e8e0e8")   )
 
-    def getColorError(self):
-        return self.value("ui/errorColor","ffb4ab")   
+    def getColorError(self) -> str:
+        return str(self.value("ui/errorColor","ffb4ab")   )
 
-    def getColorPrimary(self):
-        return self.value("ui/primaryColor","deb8f7")   
+    def getColorPrimary(self) -> str:
+        return str(self.value("ui/primaryColor","deb8f7")   )
 
-    def getColorOnPrimary(self):
-        return self.value("ui/primaryOnColor","402357")   
+    def getColorOnPrimary(self) -> str:
+        return str(self.value("ui/primaryOnColor","402357")   )
 
-    def getColorSecondary(self):
-        return self.value("ui/secondaryColor","2d2433")   
+    def getColorSecondary(self) -> str:
+        return str(self.value("ui/secondaryColor","2d2433")   )
 
-    def getColorOnSecondary(self):
-        return self.value("ui/secondaryOnColor","d1c1d9")   
+    def getColorOnSecondary(self) -> str:
+        return str(self.value("ui/secondaryOnColor","d1c1d9")   )
 
 
-    def setupTheme(self):
+    def setupTheme(self) -> None:
         if self.useSystemTheme():
             self.app.setStyleSheet("")
             return
@@ -190,7 +190,7 @@ class SettingsManager(QtCore.QSettings):
                 
             """)
 
-    def createConfigFile(self):
+    def createConfigFile(self) -> None:
 
         self.setValue("ui/useSystemTheme",self.useSystemTheme())   
 

@@ -1,13 +1,13 @@
 class HistoryManager:
-    def __init__(self):
+    def __init__(self) -> None:
         self.calcHistory: list[str] = []
         self.calcHistoryTracker: int = -1
 
-    def addToCalcHistory(self, line: str):
+    def addToCalcHistory(self, line: str) -> None:
         self.calcHistory.insert(0,line)
         self.calcHistoryTracker = -1
 
-    def getHistoryItem(self):
+    def getHistoryItem(self) -> str:
         if self.calcHistoryTracker >= len(self.calcHistory):
             self.calcHistoryTracker = len(self.calcHistory)
             return ""
@@ -16,11 +16,11 @@ class HistoryManager:
             return ""
         return self.calcHistory[self.calcHistoryTracker]
 
-    def getNextHistoryItem(self):
+    def getNextHistoryItem(self) -> str:
         self.calcHistoryTracker += 1
         return self.getHistoryItem()
 
-    def getPreviousHistoryItem(self):
+    def getPreviousHistoryItem(self) -> str:
         self.calcHistoryTracker -= 1
         return self.getHistoryItem()
 
