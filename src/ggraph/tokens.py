@@ -96,6 +96,8 @@ type Lexeme = (
     | LexemeEq
 )
 
+type LexemeOp = LexemePlus | LexemeMinus | LexemeStar | LexemeSlash | LexemeCaret
+
 
 class TokenType:
     NumLit: Literal[0] = 0
