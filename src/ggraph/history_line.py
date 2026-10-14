@@ -4,7 +4,7 @@ from PySide6.QtWidgets import QFrame, QVBoxLayout
 
 class HistoryLine(QFrame):
 
-    def __init__(self, inputtedString,outputtedString):
+    def __init__(self, inputtedString: str,outputtedString: str):
         super().__init__()
 
         vLayout = QVBoxLayout()
@@ -23,7 +23,7 @@ class HistoryLine(QFrame):
 
         self.setLayout(vLayout)
 
-    def themeOutputLabel(self, isError):
+    def themeOutputLabel(self, isError: bool):
         if isError:
             self.outputLabel.setProperty("class","label-error")
         else:

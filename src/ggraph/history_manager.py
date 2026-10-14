@@ -1,9 +1,9 @@
 class HistoryManager:
     def __init__(self):
-        self.calcHistory = []
-        self.calcHistoryTracker = -1
+        self.calcHistory: list[str] = []
+        self.calcHistoryTracker: int = -1
 
-    def addToCalcHistory(self, line):
+    def addToCalcHistory(self, line: str):
         self.calcHistory.insert(0,line)
         self.calcHistoryTracker = -1
 

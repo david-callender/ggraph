@@ -7,10 +7,11 @@ from ggraph.history_manager import HistoryManager
 from ggraph.interpreter import Env, interpret
 from ggraph.lexer import Lexer
 from ggraph.parser import Parser
+from ggraph.settings_manager import SettingsManager
 
 
 class CalculatorView(QtWidgets.QWidget):
-    def __init__(self, settings):
+    def __init__(self, settings: SettingsManager):
         super().__init__()
 
         self.settings = settings
@@ -40,7 +41,7 @@ class CalculatorView(QtWidgets.QWidget):
 
         self.mathsBox.setFocus()
 
-    def parseMath(self,input):
+    def parseMath(self, input: str):
         l = Lexer(input)
         p = Parser(l).parse()
         p.reverse()
