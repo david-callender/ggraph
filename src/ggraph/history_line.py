@@ -3,12 +3,11 @@ from PySide6.QtWidgets import QFrame, QVBoxLayout
 
 
 class HistoryLine(QFrame):
-
-    def __init__(self, inputtedString: str,outputtedString: str) -> None:
+    def __init__(self, inputtedString: str, outputtedString: str) -> None:
         super().__init__()
 
         vLayout = QVBoxLayout()
-        
+
         self.inputLabel = QtWidgets.QLabel(
             inputtedString, alignment=QtCore.Qt.AlignmentFlag.AlignLeft
         )
@@ -17,20 +16,15 @@ class HistoryLine(QFrame):
             outputtedString, alignment=QtCore.Qt.AlignmentFlag.AlignRight
         )
 
-
-        vLayout.addWidget(self.inputLabel,alignment = QtCore.Qt.AlignmentFlag.AlignTop)
-        vLayout.addWidget(self.outputLabel,alignment = QtCore.Qt.AlignmentFlag.AlignBottom)
+        vLayout.addWidget(self.inputLabel, alignment=QtCore.Qt.AlignmentFlag.AlignTop)
+        vLayout.addWidget(
+            self.outputLabel, alignment=QtCore.Qt.AlignmentFlag.AlignBottom
+        )
 
         self.setLayout(vLayout)
 
     def themeOutputLabel(self, isError: bool) -> None:
         if isError:
-            self.outputLabel.setProperty("class","label-error")
+            self.outputLabel.setProperty("class", "label-error")
         else:
-            self.outputLabel.setProperty("class","label-secondary")
-
-        
-
-
-
-
+            self.outputLabel.setProperty("class", "label-secondary")

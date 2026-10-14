@@ -41,25 +41,25 @@ class CalculatorView(QtWidgets.QWidget):
 
         self.mathsBox.setFocus()
 
-    def parseMath(self, input: str) -> tuple[str,bool]:
+    def parseMath(self, input: str) -> tuple[str, bool]:
         l = Lexer(input)
         p = Parser(l).parse()
         p.reverse()
         env = Env(None)
 
-        return (interpret(p,env).__str__() , False)
-
-
+        return (interpret(p, env).__str__(), False)
 
     @QtCore.Slot()
     def submitMath(self) -> None:
         text = self.mathsBox.text()
 
-        parsedResult = self.parseMath(text) # A tuple of a string representing the output, and a Boolean that is True if an error ocurred.
+        parsedResult = self.parseMath(
+            text
+        )  # A tuple of a string representing the output, and a Boolean that is True if an error ocurred.
 
         self.mathsBox.setFocus()
 
-        newHistoryRow = HistoryLine(text,parsedResult[0])
+        newHistoryRow = HistoryLine(text, parsedResult[0])
         newHistoryRow.themeOutputLabel(parsedResult[1])
         self.historyLayout.addWidget(newHistoryRow)
         self.historyManager.addToCalcHistory(text)
@@ -68,7 +68,9 @@ class CalculatorView(QtWidgets.QWidget):
         self.mathsBox.setText("")
 
         # Wait for the scrollbar max value to update, then scroll to the bottom
-        QtCore.QTimer.singleShot(5, lambda: self.scrollbar.setValue(self.scrollbar.maximum()))
+        QtCore.QTimer.singleShot(
+            5, lambda: self.scrollbar.setValue(self.scrollbar.maximum())
+        )
 
         print(text + ": " + parsedResult[0])
 
@@ -77,7 +79,7 @@ class CalculatorView(QtWidgets.QWidget):
         self.submitMathButton.setShortcut(QKeySequence("Return"))
         self.nextHistory = QShortcut(QKeySequence("Up"), self)
         self.previousHistory = QShortcut(QKeySequence("Down"), self)
-        
+
         # Only activate up and down when the CalculatorView or its children are focuesed
         self.previousHistory.setContext(
             QtCore.Qt.ShortcutContext.WidgetWithChildrenShortcut
@@ -85,14 +87,12 @@ class CalculatorView(QtWidgets.QWidget):
         self.nextHistory.setContext(
             QtCore.Qt.ShortcutContext.WidgetWithChildrenShortcut
         )
-        
+
         self.nextHistory.activated.connect(self.applyNextHistoryItem)
         self.previousHistory.activated.connect(self.applyPreviousHistoryItem)
-
 
     def applyNextHistoryItem(self) -> None:
         self.mathsBox.setText(self.historyManager.getNextHistoryItem())
 
     def applyPreviousHistoryItem(self) -> None:
         self.mathsBox.setText(self.historyManager.getPreviousHistoryItem())
-

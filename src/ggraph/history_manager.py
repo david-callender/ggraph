@@ -4,7 +4,7 @@ class HistoryManager:
         self.calcHistoryTracker: int = -1
 
     def addToCalcHistory(self, line: str) -> None:
-        self.calcHistory.insert(0,line)
+        self.calcHistory.insert(0, line)
         self.calcHistoryTracker = -1
 
     def getHistoryItem(self) -> str:
@@ -23,5 +23,3 @@ class HistoryManager:
     def getPreviousHistoryItem(self) -> str:
         self.calcHistoryTracker -= 1
         return self.getHistoryItem()
-
-

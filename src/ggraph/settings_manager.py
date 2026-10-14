@@ -5,7 +5,7 @@ from PySide6.QtCore import QFileSystemWatcher
 
 
 class SettingsManager(QtCore.QSettings):
-    def __init__(self,app: QtWidgets.QApplication) -> None:
+    def __init__(self, app: QtWidgets.QApplication) -> None:
         super().__init__("Social-Coding", "GGraph")
         self.app = app
 
@@ -30,63 +30,60 @@ class SettingsManager(QtCore.QSettings):
             self.watcher.addPath(self.fileName())
 
         self.setupTheme()
-            
-
 
     def useSystemTheme(self) -> bool:
         return self.value("ui/useSystemTheme", "true") == "true"
 
     def getRoundingRadiusSmall(self) -> str:
-        return str(self.value("ui/smallCornerRadius",5))
+        return str(self.value("ui/smallCornerRadius", 5))
 
     def getRoundingRadiusMed(self) -> str:
-        return str(self.value("ui/medCornerRadius",2))
+        return str(self.value("ui/medCornerRadius", 2))
 
     def getRoundingRadiusBig(self) -> str:
-        return str(self.value("ui/bigCornerRadius",10))
+        return str(self.value("ui/bigCornerRadius", 10))
 
     def getBorderRadiusBig(self) -> str:
-        return str(self.value("ui/bigBorderRadius",3))
+        return str(self.value("ui/bigBorderRadius", 3))
 
     def getBorderRadiusMed(self) -> str:
-        return str(self.value("ui/medBorderRadius",2))
+        return str(self.value("ui/medBorderRadius", 2))
 
     def getBorderRadiusSmall(self) -> str:
-        return str(self.value("ui/smallBorderRadius",1))
+        return str(self.value("ui/smallBorderRadius", 1))
 
     def getColorBackground(self) -> str:
-        return str(self.value("ui/backgroundColor","161217"))
+        return str(self.value("ui/backgroundColor", "161217"))
 
     def getColorSurface(self) -> str:
-        return str(self.value("ui/surfaceColor","161217"))
+        return str(self.value("ui/surfaceColor", "161217"))
 
     def getColorOnSurface(self) -> str:
-        return str(self.value("ui/onSurfaceColor","e8e0e8")   )
+        return str(self.value("ui/onSurfaceColor", "e8e0e8"))
 
     def getColorOnBackground(self) -> str:
-        return str(self.value("ui/onBackgroundColor","e8e0e8")   )
+        return str(self.value("ui/onBackgroundColor", "e8e0e8"))
 
     def getColorError(self) -> str:
-        return str(self.value("ui/errorColor","ffb4ab")   )
+        return str(self.value("ui/errorColor", "ffb4ab"))
 
     def getColorPrimary(self) -> str:
-        return str(self.value("ui/primaryColor","deb8f7")   )
+        return str(self.value("ui/primaryColor", "deb8f7"))
 
     def getColorOnPrimary(self) -> str:
-        return str(self.value("ui/primaryOnColor","402357")   )
+        return str(self.value("ui/primaryOnColor", "402357"))
 
     def getColorSecondary(self) -> str:
-        return str(self.value("ui/secondaryColor","2d2433")   )
+        return str(self.value("ui/secondaryColor", "2d2433"))
 
     def getColorOnSecondary(self) -> str:
-        return str(self.value("ui/secondaryOnColor","d1c1d9")   )
-
+        return str(self.value("ui/secondaryOnColor", "d1c1d9"))
 
     def setupTheme(self) -> None:
         if self.useSystemTheme():
             self.app.setStyleSheet("")
             return
-        
+
         self.app.setStyleSheet(f"""
                 QWidget {{
                     background-color: #{self.getColorBackground()};
@@ -192,20 +189,20 @@ class SettingsManager(QtCore.QSettings):
 
     def createConfigFile(self) -> None:
 
-        self.setValue("ui/useSystemTheme",self.useSystemTheme())   
+        self.setValue("ui/useSystemTheme", self.useSystemTheme())
 
-        self.setValue("ui/smallCornerRadius",self.getRoundingRadiusSmall())
-        self.setValue("ui/medCornerRadius",self.getRoundingRadiusMed())
-        self.setValue("ui/bigCornerRadius",self.getRoundingRadiusBig())
-        self.setValue("ui/bigBorderRadius",self.getBorderRadiusBig())
-        self.setValue("ui/medBorderRadius",self.getBorderRadiusMed())
-        self.setValue("ui/smallBorderRadius",self.getBorderRadiusSmall())
-        self.setValue("ui/backgroundColor",self.getColorBackground())
-        self.setValue("ui/surfaceColor",self.getColorSurface())
-        self.setValue("ui/onSurfaceColor",self.getColorOnSurface())   
-        self.setValue("ui/onBackgroundColor",self.getColorOnBackground())   
-        self.setValue("ui/errorColor",self.getColorError())   
-        self.setValue("ui/primaryColor",self.getColorPrimary())   
-        self.setValue("ui/primaryOnColor",self.getColorOnPrimary())   
-        self.setValue("ui/secondaryColor",self.getColorSecondary())   
-        self.setValue("ui/secondaryOnColor",self.getColorOnSecondary())   
+        self.setValue("ui/smallCornerRadius", self.getRoundingRadiusSmall())
+        self.setValue("ui/medCornerRadius", self.getRoundingRadiusMed())
+        self.setValue("ui/bigCornerRadius", self.getRoundingRadiusBig())
+        self.setValue("ui/bigBorderRadius", self.getBorderRadiusBig())
+        self.setValue("ui/medBorderRadius", self.getBorderRadiusMed())
+        self.setValue("ui/smallBorderRadius", self.getBorderRadiusSmall())
+        self.setValue("ui/backgroundColor", self.getColorBackground())
+        self.setValue("ui/surfaceColor", self.getColorSurface())
+        self.setValue("ui/onSurfaceColor", self.getColorOnSurface())
+        self.setValue("ui/onBackgroundColor", self.getColorOnBackground())
+        self.setValue("ui/errorColor", self.getColorError())
+        self.setValue("ui/primaryColor", self.getColorPrimary())
+        self.setValue("ui/primaryOnColor", self.getColorOnPrimary())
+        self.setValue("ui/secondaryColor", self.getColorSecondary())
+        self.setValue("ui/secondaryOnColor", self.getColorOnSecondary())
