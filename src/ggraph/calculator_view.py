@@ -2,8 +2,8 @@ from PySide6 import QtCore, QtWidgets
 from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import QVBoxLayout
 
-from ggraph.HistoryLine import HistoryLine
-from ggraph.HistoryManager import HistoryManager
+from ggraph.history_line import HistoryLine
+from ggraph.history_manager import HistoryManager
 from ggraph.interpreter import Env, interpret
 from ggraph.lexer import Lexer
 from ggraph.parser import Parser
@@ -45,6 +45,7 @@ class CalculatorView(QtWidgets.QWidget):
         p = Parser(l).parse()
         p.reverse()
         env = Env(None)
+
         return (interpret(p,env).__str__() , False)
 
 

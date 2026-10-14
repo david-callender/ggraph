@@ -2,15 +2,15 @@ import sys
 
 from PySide6 import QtWidgets
 
-import ggraph.CalculatorView
-import ggraph.SettingsManager
+from ggraph.calculator_view import CalculatorView
+from ggraph.settings_manager import SettingsManager
 
 
 def main() -> None:
     app = QtWidgets.QApplication([])
-    settings = ggraph.SettingsManager.SettingsManager(app)
+    settings = SettingsManager(app)
 
-    widget = ggraph.CalculatorView.CalculatorView(settings)
+    widget = CalculatorView(settings)
     settings.setupTheme()
     widget.resize(800, 600)
     widget.show()
