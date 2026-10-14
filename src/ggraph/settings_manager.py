@@ -9,7 +9,7 @@ class SettingsManager(QtCore.QSettings):
         super().__init__("Social-Coding", "GGraph")
         self.app = app
 
-        if self.allKeys().__len__() == 0:
+        if len(self.allKeys()) == 0:
             print("No config file found, creating default")
             self.createConfigFile()
 

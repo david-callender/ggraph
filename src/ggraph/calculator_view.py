@@ -47,9 +47,9 @@ class CalculatorView(QtWidgets.QWidget):
             p = Parser(l).parse()
             p.reverse()
             env = Env(None)
-            return (interpret(p, env).__str__(), False)
+            return (str(interpret(p, env)), False)
         except (LexerError, ParserError, InterpreterError, ZeroDivisionError) as e:
-            return (e.__str__(), True)
+            return (str(e), True)
 
     @QtCore.Slot()
     def submitMath(self) -> None:
