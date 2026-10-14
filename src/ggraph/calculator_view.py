@@ -4,9 +4,9 @@ from PySide6.QtWidgets import QVBoxLayout
 
 from ggraph.history_line import HistoryLine
 from ggraph.history_manager import HistoryManager
-from ggraph.interpreter import Env, interpret
-from ggraph.lexer import Lexer
-from ggraph.parser import Parser
+from ggraph.interpreter import Env, InterpreterError, interpret
+from ggraph.lexer import Lexer, LexerError
+from ggraph.parser import Parser, ParserError
 from ggraph.settings_manager import SettingsManager
 
 
@@ -42,12 +42,14 @@ class CalculatorView(QtWidgets.QWidget):
         self.mathsBox.setFocus()
 
     def parseMath(self, input: str) -> tuple[str, bool]:
-        l = Lexer(input)
-        p = Parser(l).parse()
-        p.reverse()
-        env = Env(None)
-
-        return (interpret(p, env).__str__(), False)
+        try:
+            l = Lexer(input)
+            p = Parser(l).parse()
+            p.reverse()
+            env = Env(None)
+            return (interpret(p, env).__str__(), False)
+        except (LexerError, ParserError, InterpreterError, ZeroDivisionError) as e:
+            return (e.__str__(), True)
 
     @QtCore.Slot()
     def submitMath(self) -> None:
