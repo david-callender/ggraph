@@ -27,6 +27,9 @@ class LexemeNumLit:
     def __init__(self, value):
         self.value = value
 
+    def __str__(self):
+        return str(self.value)
+
 
 class LexemeName:
     tag = LexemeType.Name
@@ -35,11 +38,17 @@ class LexemeName:
     def __init__(self, value):
         self.value = value
 
+    def __str__(self):
+        return str(self.value)
+
 
 class LexemePlus:
     tag = LexemeType.Plus
     precedence = 10
     associativity = LexemeAssociativity.Left
+
+    def __str__(self):
+        return "+"
 
 
 class LexemeMinus:
@@ -47,11 +56,17 @@ class LexemeMinus:
     precedence = 10
     associativity = LexemeAssociativity.Left
 
+    def __str__(self):
+        return "-"
+
 
 class LexemeStar:
     tag = LexemeType.Star
     precedence = 20
     associativity = LexemeAssociativity.Left
+
+    def __str__(self):
+        return "*"
 
 
 class LexemeSlash:
@@ -59,27 +74,45 @@ class LexemeSlash:
     precedence = 20
     associativity = LexemeAssociativity.Left
 
+    def __str__(self):
+        return "/"
+
 
 class LexemeCaret:
     tag = LexemeType.Caret
     precedence = 30
     associativity = LexemeAssociativity.Right
 
+    def __str__(self):
+        return "^"
+
 
 class LexemeOpenParen:
     tag = LexemeType.OpenParen
+
+    def __str__(self):
+        return "("
 
 
 class LexemeCloseParen:
     tag = LexemeType.CloseParen
 
+    def __str__(self):
+        return ")"
+
 
 class LexemeComma:
     tag = LexemeType.Comma
 
+    def __str__(self):
+        return ","
+
 
 class LexemeEq:
     tag = LexemeType.Eq
+
+    def __str__(self):
+        return "="
 
 
 type Lexeme = (
@@ -119,6 +152,9 @@ class TokenNumLit:
     def __init__(self, value: float):
         self.value = value
 
+    def __str__(self):
+        return str(self.value)
+
 
 class TokenVar:
     tag = TokenType.Var
@@ -127,25 +163,43 @@ class TokenVar:
     def __init__(self, name: str):
         self.name = name
 
+    def __str__(self):
+        return str(self.name)
+
 
 class TokenAdd:
     tag = TokenType.Add
+
+    def __str__(self):
+        return "+"
 
 
 class TokenSub:
     tag = TokenType.Sub
 
+    def __str__(self):
+        return "-"
+
 
 class TokenMul:
     tag = TokenType.Mul
+
+    def __str__(self):
+        return "*"
 
 
 class TokenDiv:
     tag = TokenType.Div
 
+    def __str__(self):
+        return "/"
+
 
 class TokenPow:
     tag = TokenType.Pow
+
+    def __str__(self):
+        return "^"
 
 
 class TokenFuncCall:
@@ -157,9 +211,15 @@ class TokenFuncCall:
         self.name = name
         self.num_args = num_args
 
+    def __str__(self):
+        return f"FuncCall({self.name} {self.num_args})"
+
 
 class TokenFuncEnd:
     tag = TokenType.FuncEnd
+
+    def __str__(self):
+        return "FuncEnd"
 
 
 class TokenFuncDef:
@@ -172,6 +232,9 @@ class TokenFuncDef:
         self.name = name
         self.args = args
         self.body = body
+
+    def __str__(self):
+        return f"FuncCall({self.name} {self.args} {self.body})"
 
 
 type Token = (
