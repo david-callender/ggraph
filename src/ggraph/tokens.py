@@ -18,6 +18,7 @@ class LexemeType:
     CloseParen: Literal[8] = 8
     Comma: Literal[9] = 9
     Eq: Literal[10] = 10
+    UnaryMinus: Literal[11] = 11
 
 
 class LexemeNumLit:
@@ -115,6 +116,12 @@ class LexemeEq:
         return "="
 
 
+class LexemeUnaryMinus:
+    tag = LexemeType.UnaryMinus
+    precedence = 40
+    associativity = LexemeAssociativity.Right
+
+
 type Lexeme = (
     LexemeNumLit
     | LexemeName
@@ -127,6 +134,7 @@ type Lexeme = (
     | LexemeCloseParen
     | LexemeComma
     | LexemeEq
+    | LexemeUnaryMinus
 )
 
 type LexemeOp = LexemePlus | LexemeMinus | LexemeStar | LexemeSlash | LexemeCaret
@@ -143,6 +151,7 @@ class TokenType:
     FuncCall: Literal[7] = 7
     FuncEnd: Literal[8] = 8
     FuncDef: Literal[9] = 9
+    Negate: Literal[10] = 10
 
 
 class TokenNumLit:
@@ -237,6 +246,13 @@ class TokenFuncDef:
         return f"FuncCall({self.name} {self.args} {self.body})"
 
 
+class TokenNegate:
+    tag = TokenType.Negate
+
+    def __str__(self):
+        return "⁻"
+
+
 type Token = (
     TokenNumLit
     | TokenVar
@@ -248,4 +264,5 @@ type Token = (
     | TokenFuncCall
     | TokenFuncEnd
     | TokenFuncDef
+    | TokenNegate
 )
