@@ -19,6 +19,8 @@ def lexeme_to_token(lexeme: Lexeme) -> Token:
             return TokenDiv()
         case LexemeType.Caret:
             return TokenPow()
+        case LexemeType.UnaryMinus:
+            return TokenNegate()
     raise ParserError(f"Non-simple token provided to lexeme_to_token: {lexeme}")
 
 
@@ -43,6 +45,7 @@ class Parser:
         return iter(stream)
 
     def parse(self) -> list[Token]:
+        last_lexeme: Lexeme | None = None
         for lexeme in self.lexeme_stream:
             match lexeme.tag:
                 case LexemeType.NumLit:
@@ -55,7 +58,9 @@ class Parser:
                 case LexemeType.OpenParen:
                     self.stack.append(lexeme)
                 case LexemeType.CloseParen:
-                    self.parse_close_paren()
+                    self.parse_close_paren(last_lexeme)
+                case LexemeType.Minus:
+                    self.parse_minus(last_lexeme)
                 # All of the special operators have now been dealt with,
                 # and we can parse the regular operators.
                 case _:
@@ -64,9 +69,12 @@ class Parser:
                     op: LexemeOp = lexeme
                     self.parse_op(op)
 
+            last_lexeme = lexeme
+
         for lexeme in self.stack[::-1]:
             # Only simple operators should be left by now.
-            self.output.append(lexeme_to_token(lexeme))
+            if lexeme.tag != LexemeType.OpenParen:
+                self.output.append(lexeme_to_token(lexeme))
 
         return self.output
 
@@ -92,7 +100,9 @@ class Parser:
         except IndexError:
             raise ParserError("Comma placed outside of parentheses")
 
-    def parse_close_paren(self) -> None:
+    def parse_close_paren(self, last_lexeme: Lexeme | None) -> None:
+        if last_lexeme and last_lexeme.tag == LexemeType.OpenParen:
+            raise ParserError("Empty parentheses are not allowed")
         try:
             self.slurp_paren()
             if self.stack.pop().tag != LexemeType.OpenParen:
@@ -111,6 +121,16 @@ class Parser:
                 raise ParserError("Comma inside non-function call")
         except IndexError:
             raise ParserError("Mismatched parentheses")
+
+    def parse_minus(self, last_lexeme: Lexeme | None) -> None:
+        if not last_lexeme or last_lexeme.tag not in [
+            LexemeType.NumLit,
+            LexemeType.Name,
+            LexemeType.CloseParen,
+        ]:
+            self.stack.append(LexemeUnaryMinus())
+        else:
+            self.parse_op(LexemeMinus())
 
     def parse_op(self, lexeme: LexemeOp) -> None:
         while self.stack_has_precedence(lexeme):
