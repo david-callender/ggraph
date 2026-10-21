@@ -56,13 +56,13 @@ class SettingsManager(QtCore.QSettings):
         return str(self.value("ui/backgroundColor", "161217"))
 
     def getColorSurface(self) -> str:
-        return str(self.value("ui/surfaceColor", "161217"))
+        return str(self.value("ui/surfaceColor", "181216"))
 
     def getColorOnSurface(self) -> str:
-        return str(self.value("ui/onSurfaceColor", "e8e0e8"))
+        return str(self.value("ui/onSurfaceColor", "ecdfe5"))
 
     def getColorOnBackground(self) -> str:
-        return str(self.value("ui/onBackgroundColor", "e8e0e8"))
+        return str(self.value("ui/onBackgroundColor", "ecdfe5"))
 
     def getColorError(self) -> str:
         return str(self.value("ui/errorColor", "ffb4ab"))
@@ -125,6 +125,44 @@ class SettingsManager(QtCore.QSettings):
                     border: {self.getBorderRadiusBig()}px solid #{self.getColorOnPrimary()}; 
                     border-radius: {self.getRoundingRadiusBig()}px;        
                 }}
+
+
+                QTabBar {{
+                    color: #{self.getColorOnBackground()};
+                    background-color: #{self.getColorBackground()};
+                    border: {self.getBorderRadiusBig()}px solid #{self.getColorBackground()};
+                }}
+                QTabWidget {{
+                    margin: {self.getRoundingRadiusBig()}px;
+                    background-color: #{self.getColorBackground()};
+                }}
+                QTabWidget::pane {{
+                    color: #{self.getColorOnBackground()};
+                    border: {self.getBorderRadiusBig()}px solid #{self.getColorOnPrimary()};
+                    border-radius: {self.getRoundingRadiusBig()}px;
+                    padding: {self.getRoundingRadiusBig()}px;
+                }}
+
+                QTabBar::tab {{
+                    background-color: #{self.getColorSurface()};
+                    color: #{self.getColorOnSurface()};
+                    border: {self.getBorderRadiusSmall()}px solid #{self.getColorOnPrimary()};
+                    border-radius: {self.getRoundingRadiusSmall()}px;
+                    padding: {self.getRoundingRadiusMed()}px;
+                }}
+                QTabBar::tab:selected {{
+                    background-color: #{self.getColorPrimary()};
+                    color: #{self.getColorOnPrimary()};
+                    font-weight: bold;
+                    border-bottom: 2px solid #{self.getColorOnPrimary()};
+                }}
+                QTabBar::tab:!selected:hover {{
+                    background-color: #{self.getColorBackground()};
+                    color: #{self.getColorOnBackground()};
+                }}
+
+
+
 
                 /* ===================================================================
                    ScrollBar and its many bits
