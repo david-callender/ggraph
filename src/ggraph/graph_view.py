@@ -1,3 +1,5 @@
+from typing import override
+
 from PySide6 import QtCore, QtWidgets
 from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import QVBoxLayout
@@ -37,8 +39,13 @@ class GraphView(TabInterface):
         layout.addWidget(self.mathsBox)
         layout.addWidget(self.submitMathButton)
 
-    def onFocused(self):
+    @override
+    def onFocused(self) -> None:
         print("graph focused")
+
+    @override
+    def onUnfocused(self) -> None:
+        print("graph unfocused")
 
     def parseMath(self, input: str) -> tuple[str, bool]:
         try:

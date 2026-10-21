@@ -1,3 +1,5 @@
+from typing import override
+
 from PySide6 import QtCore, QtWidgets
 from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import QVBoxLayout
@@ -47,12 +49,14 @@ class CalculatorView(TabInterface):
         except (LexerError, ParserError, InterpreterError, ZeroDivisionError) as e:
             return (str(e), True)
 
-    def onFocused(self):
+    @override
+    def onFocused(self) -> None:
         self.mathsBox.setFocus()
         self.submitMathButton.clicked.connect(self.submitMath)
         self.setupKeybinds()
 
-    def onUnfocused(self):
+    @override
+    def onUnfocused(self) -> None:
         self.submitMathButton.clicked.disconnect()
 
     @QtCore.Slot()

@@ -9,9 +9,9 @@ class TabInterface(QWidget):
         super().__init__()
 
     @abstractmethod
-    def onFocused(self):
+    def onFocused(self) -> None:
         raise NotImplementedError("onFocused not set up")
 
     @abstractmethod
-    def onUnfocused(self):
+    def onUnfocused(self) -> None:
         raise NotImplementedError("onUnfocused not set up")

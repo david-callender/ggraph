@@ -1,5 +1,6 @@
 from typing import assert_type
 
+from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import QSizePolicy, QTabWidget
 
 from ggraph.calculator_view import CalculatorView
@@ -23,9 +24,10 @@ class TabManager(QTabWidget):
 
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.currentChanged.connect(self.onTabSelected)
+        self.onTabSelected(self.currentIndex())
+        self.setupKeybinds()
 
-    def onTabSelected(self, index: int):
-        print(index)
+    def onTabSelected(self, index: int) -> None:
         for i in range(self.count()):
             widget = self.widget(i)
             if not isinstance(widget, TabInterface):
@@ -37,3 +39,20 @@ class TabManager(QTabWidget):
                 widget.onFocused()
             else:
                 widget.onUnfocused()
+
+    def setupKeybinds(self) -> None:
+        # Next tab: Ctrl+Tab
+        self.next_shortcut = QShortcut(QKeySequence("Ctrl+Tab"), self)
+        self.next_shortcut.activated.connect(self.nextTab)
+
+        # Previous tab: Ctrl+Shift+Tab
+        self.prev_shortcut = QShortcut(QKeySequence("Ctrl+Shift+Tab"), self)
+        self.prev_shortcut.activated.connect(self.previousTab)
+
+    def nextTab(self) -> None:
+        if self.count() > 0:
+            self.setCurrentIndex((self.currentIndex() + 1) % self.count())
+
+    def previousTab(self) -> None:
+        if self.count() > 0:
+            self.setCurrentIndex((self.currentIndex() - 1) % self.count())
