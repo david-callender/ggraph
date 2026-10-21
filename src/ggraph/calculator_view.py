@@ -8,9 +8,10 @@ from ggraph.interpreter import Env, InterpreterError, interpret
 from ggraph.lexer import Lexer, LexerError
 from ggraph.parser import Parser, ParserError
 from ggraph.settings_manager import SettingsManager
+from ggraph.tab_interface import TabInterface
 
 
-class CalculatorView(QtWidgets.QWidget):
+class CalculatorView(TabInterface):
     def __init__(self, settings: SettingsManager) -> None:
         super().__init__()
 
@@ -30,16 +31,11 @@ class CalculatorView(QtWidgets.QWidget):
         self.historyScroller.setWidget(self.historyHolder)
         self.historyScroller.setWidgetResizable(True)
 
-        self.submitMathButton.clicked.connect(self.submitMath)
-        self.setupKeybinds()
-
         layout = QtWidgets.QVBoxLayout(self)
 
         layout.addWidget(self.historyScroller)
         layout.addWidget(self.mathsBox)
         layout.addWidget(self.submitMathButton)
-
-        self.mathsBox.setFocus()
 
     def parseMath(self, input: str) -> tuple[str, bool]:
         try:
@@ -50,6 +46,14 @@ class CalculatorView(QtWidgets.QWidget):
             return (str(interpret(p, env)), False)
         except (LexerError, ParserError, InterpreterError, ZeroDivisionError) as e:
             return (str(e), True)
+
+    def onFocused(self):
+        self.mathsBox.setFocus()
+        self.submitMathButton.clicked.connect(self.submitMath)
+        self.setupKeybinds()
+
+    def onUnfocused(self):
+        self.submitMathButton.clicked.disconnect()
 
     @QtCore.Slot()
     def submitMath(self) -> None:

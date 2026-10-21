@@ -1,8 +1,11 @@
+from typing import assert_type
+
 from PySide6.QtWidgets import QSizePolicy, QTabWidget
 
 from ggraph.calculator_view import CalculatorView
 from ggraph.graph_view import GraphView
 from ggraph.settings_manager import SettingsManager
+from ggraph.tab_interface import TabInterface
 
 
 class TabManager(QTabWidget):
@@ -19,3 +22,18 @@ class TabManager(QTabWidget):
         self.setContentsMargins(10, 10, 10, 10)
 
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.currentChanged.connect(self.onTabSelected)
+
+    def onTabSelected(self, index: int):
+        print(index)
+        for i in range(self.count()):
+            widget = self.widget(i)
+            if not isinstance(widget, TabInterface):
+                raise TypeError("Widget is not a TabInterface")
+            else:
+                assert_type(widget, TabInterface)
+
+            if i == index:
+                widget.onFocused()
+            else:
+                widget.onUnfocused()
