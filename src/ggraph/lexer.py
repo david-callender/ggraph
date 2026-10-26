@@ -37,7 +37,7 @@ class Lexer:
     def next_tok(self) -> Lexeme:
         next_char = self.expression.peek()
 
-        if next_char.isnumeric():
+        if next_char.isnumeric() or next_char == ".":
             return self.lex_num_literal()
         elif next_char.isalpha():
             return self.lex_name()

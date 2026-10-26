@@ -106,6 +106,10 @@ def interpret(program: list[Token], start_env: Env) -> float:
                 func_object = RuntimeFunc(token.name, token.args, token.body)
                 env.funcs[token.name] = func_object
 
+            case TokenType.Negate:
+                a = stack.pop()
+                stack.append(-a)
+
             case _:
                 assert_never(token.tag)
 
