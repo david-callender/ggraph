@@ -1,19 +1,20 @@
 from collections.abc import Iterator
+
 from more_itertools import peekable
 
 from ggraph.tokens import (
     Lexeme,
-    LexemeNumLit,
-    LexemeName,
-    LexemePlus,
-    LexemeMinus,
-    LexemeStar,
-    LexemeSlash,
     LexemeCaret,
-    LexemeOpenParen,
     LexemeCloseParen,
     LexemeComma,
     LexemeEq,
+    LexemeMinus,
+    LexemeName,
+    LexemeNumLit,
+    LexemeOpenParen,
+    LexemePlus,
+    LexemeSlash,
+    LexemeStar,
 )
 
 

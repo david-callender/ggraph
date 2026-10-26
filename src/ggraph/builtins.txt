@@ -1,0 +1,39 @@
+sqrt(n: float) -> float
+root(base: float, power: float) -> float
+min(a: float, b: float) -> float
+max(a: float, b: float) -> float
+abs(n: float) -> float
+round(n: float, precision: int) -> float
+int(n: float) -> int
+truncate(n: float) -> float
+lcm(a: int, b: int) -> int
+gcd(a: int, b: int) -> int
+nPr(n: int, r: int) -> int
+nCr(n: int, r: int) -> int
+exp(n: float) -> float
+log(n: float) -> float
+ln(n: float) -> float
+sin(n: float) -> float
+cos(n: float) -> float
+tan(n: float) -> float
+arcsin(n: float) -> float
+arccos(n: float) -> float
+arctan(n: float) -> float
+sinh(n: float) -> float
+cosh(n: float) -> float
+tanh(n: float) -> float
+arcsinh(n: float) -> float
+arccosh(n: float) -> float
+arctanh(n: float) -> float
+csc(n: float) -> float
+sec(n: float) -> float
+cot(n: float) -> float
+arccsc(n: float) -> float
+arcsec(n: float) -> float
+arccot(n: float) -> float
+csch(n: float) -> float
+sech(n: float) -> float
+coth(n: float) -> float
+arccsch(n: float) -> float
+arcsech(n: float) -> float
+arccoth(n: float) -> float
