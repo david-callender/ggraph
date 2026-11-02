@@ -1,10 +1,8 @@
 from typing import assert_never
 
+from ggraph.builtins import construct_builtin_map, safePow
+from ggraph.errors import InterpreterError
 from ggraph.tokens import Token, TokenFuncEnd, TokenType
-
-
-class InterpreterError(Exception):
-    pass
 
 
 class RuntimeFunc:
@@ -44,7 +42,28 @@ class Env:
 
 
 def interpret(program: list[Token], start_env: Env) -> float:
+    builtins = construct_builtin_map()
+
     stack = []
+
+    def pop_float() -> float:
+        if len(stack) == 0:
+            raise InterpreterError(
+                "misaligned stack, tried to pop a float from an empty stack"
+            )
+        return stack.pop()
+
+    def pop_int() -> int:
+        if len(stack) == 0:
+            raise InterpreterError(
+                "misaligned stack, tried to pop an int from an empty stack"
+            )
+        value = stack.pop()
+        int_value = int(value)
+        if value != float(int_value):
+            print(f"Expected int to function {builtin.name}")
+
+        return int_value
 
     env = start_env
 
@@ -56,50 +75,74 @@ def interpret(program: list[Token], start_env: Env) -> float:
 
             case TokenType.Var:
                 value = env.search_var(token.name)
+                if value is None:
+                    raise InterpreterError(f"Couldn't find variable {token.name}")
                 stack.append(value)
 
             case TokenType.Add:
-                a = stack.pop()
-                b = stack.pop()
+                a = pop_float()
+                b = pop_float()
                 stack.append(b + a)
 
             case TokenType.Sub:
-                a = stack.pop()
-                b = stack.pop()
+                a = pop_float()
+                b = pop_float()
                 stack.append(b - a)
 
             case TokenType.Mul:
-                a = stack.pop()
-                b = stack.pop()
+                a = pop_float()
+                b = pop_float()
                 stack.append(b * a)
 
             case TokenType.Div:
-                a = stack.pop()
-                b = stack.pop()
+                a = pop_float()
+                b = pop_float()
                 stack.append(b / a)
 
             case TokenType.Pow:
-                a = stack.pop()
-                b = stack.pop()
-                stack.append(b**a)
+                a = pop_float()
+                b = pop_float()
+                stack.append(safePow(b, a))
 
             case TokenType.FuncCall:
-                func_object = env.search_funcs(token.name)
-                if func_object is None:
-                    raise InterpreterError(f"Failed to find function {token.name}")
+                if token.name in builtins:
+                    builtin = builtins[token.name]
 
-                new_env = Env(env)
-                for arg in func_object.args:
-                    value = stack.pop()
-                    new_env.vars[arg] = value
+                    match builtin.typed_impl:
+                        case ("float", impl):
+                            stack.append(impl(pop_float()))
+                        case ("float,float", impl):
+                            a = pop_float()
+                            b = pop_float()
+                            stack.append(impl(b, a))
+                        case ("float,int", impl):
+                            a = pop_int()
+                            b = pop_float()
+                            stack.append(impl(b, a))
+                        case ("int,int", impl):
+                            a = pop_int()
+                            b = pop_int()
+                            stack.append(impl(b, a))
+                        case _:
+                            assert_never(builtin.typed_impl)
 
-                program.append(TokenFuncEnd())
-                program.extend(func_object.body)
-                env = new_env
+                else:
+                    func_object = env.search_funcs(token.name)
+                    if func_object is None:
+                        raise InterpreterError(f"Failed to find function {token.name}")
+
+                    new_env = Env(env)
+                    for arg_type in func_object.args:
+                        value = stack.pop()
+                        new_env.vars[arg_type] = value
+
+                    program.append(TokenFuncEnd())
+                    program.extend(func_object.body)
+                    env = new_env
 
             case TokenType.FuncEnd:
                 if env.parent is None:
-                    raise InterpreterError("missaligned env stack")
+                    raise InterpreterError("misaligned env stack")
                 env = env.parent
 
             case TokenType.FuncDef:
@@ -107,7 +150,7 @@ def interpret(program: list[Token], start_env: Env) -> float:
                 env.funcs[token.name] = func_object
 
             case TokenType.Negate:
-                a = stack.pop()
+                a = pop_float()
                 stack.append(-a)
 
             case _:
