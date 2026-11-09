@@ -1,11 +1,10 @@
 from typing import override
 
-from PySide6 import QtCore, QtWidgets
-from PySide6.QtGui import QKeySequence, QShortcut
-from PySide6.QtWidgets import QVBoxLayout
+from PySide6 import QtWidgets
+from PySide6.QtWidgets import QSizePolicy
 
-from ggraph.history_line import HistoryLine
-from ggraph.history_manager import HistoryManager
+from ggraph.equation_line import EquationLine
+from ggraph.graph_canvas import GraphCanvas
 from ggraph.interpreter import Env, InterpreterError, interpret
 from ggraph.lexer import Lexer, LexerError
 from ggraph.parser import Parser, ParserError
@@ -19,33 +18,38 @@ class GraphView(TabInterface):
 
         self.settings = settings
 
-        self.mathsBox = QtWidgets.QLineEdit("")
-        self.historyManager = HistoryManager()
-        self.submitMathButton = QtWidgets.QPushButton("Graph Mode")
-        self.historyScroller = QtWidgets.QScrollArea()
-        self.historyHolder = QtWidgets.QFrame()
-        self.scrollbar = self.historyScroller.verticalScrollBar()
+        self.graphScroller = QtWidgets.QScrollArea()
+        self.graphHolder = GraphCanvas(self.settings)
 
-        self.historyLayout = QVBoxLayout(self.historyHolder)
-        self.historyLayout.addStretch()
-        self.historyLayout.setAlignment(QtCore.Qt.AlignmentFlag.AlignBottom)
+        # self.equationScroller = QtWidgets.QScrollArea()
+        # self.equationHolder = QWidget()
+        self.equationLine = EquationLine()
 
-        self.historyScroller.setWidget(self.historyHolder)
-        self.historyScroller.setWidgetResizable(True)
+        # self.graphLayout = QVBoxLayout(self.graphHolder)
+        # self.graphLayout.addStretch()
+        self.graphHolder.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding
+        )
+
+        self.graphScroller.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding
+        )
+
+        self.graphScroller.setWidget(self.graphHolder)
+        self.graphScroller.setWidgetResizable(True)
 
         layout = QtWidgets.QVBoxLayout(self)
 
-        layout.addWidget(self.historyScroller)
-        layout.addWidget(self.mathsBox)
-        layout.addWidget(self.submitMathButton)
+        layout.addWidget(self.graphScroller)
+        layout.addWidget(self.equationLine)
 
     @override
     def onFocused(self) -> None:
-        print("graph focused")
+        pass
 
     @override
     def onUnfocused(self) -> None:
-        print("graph unfocused")
+        pass
 
     def parseMath(self, input: str) -> tuple[str, bool]:
         try:
@@ -56,51 +60,3 @@ class GraphView(TabInterface):
             return (str(interpret(p, env)), False)
         except (LexerError, ParserError, InterpreterError, ZeroDivisionError) as e:
             return (str(e), True)
-
-    @QtCore.Slot()
-    def submitMath(self) -> None:
-        text = self.mathsBox.text()
-
-        parsedResult = self.parseMath(
-            text
-        )  # A tuple of a string representing the output, and a Boolean that is True if an error ocurred.
-
-        self.mathsBox.setFocus()
-
-        newHistoryRow = HistoryLine(text, parsedResult[0])
-        newHistoryRow.themeOutputLabel(parsedResult[1])
-        self.historyLayout.addWidget(newHistoryRow)
-        self.historyManager.addToCalcHistory(text)
-        self.historyManager.addToCalcHistory(parsedResult[0])
-
-        self.mathsBox.setText("")
-
-        # Wait for the scrollbar max value to update, then scroll to the bottom
-        QtCore.QTimer.singleShot(
-            5, lambda: self.scrollbar.setValue(self.scrollbar.maximum())
-        )
-
-        print(text + ": " + parsedResult[0])
-
-    def setupKeybinds(self) -> None:
-
-        self.submitMathButton.setShortcut(QKeySequence("Return"))
-        self.nextHistory = QShortcut(QKeySequence("Up"), self)
-        self.previousHistory = QShortcut(QKeySequence("Down"), self)
-
-        # Only activate up and down when the CalculatorView or its children are focuesed
-        self.previousHistory.setContext(
-            QtCore.Qt.ShortcutContext.WidgetWithChildrenShortcut
-        )
-        self.nextHistory.setContext(
-            QtCore.Qt.ShortcutContext.WidgetWithChildrenShortcut
-        )
-
-        self.nextHistory.activated.connect(self.applyNextHistoryItem)
-        self.previousHistory.activated.connect(self.applyPreviousHistoryItem)
-
-    def applyNextHistoryItem(self) -> None:
-        self.mathsBox.setText(self.historyManager.getNextHistoryItem())
-
-    def applyPreviousHistoryItem(self) -> None:
-        self.mathsBox.setText(self.historyManager.getPreviousHistoryItem())

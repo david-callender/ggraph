@@ -16,7 +16,7 @@ class TabManager(QTabWidget):
         self.graphView = GraphView(settings)
 
         self.addTab(self.calculatorView, "Calculator")
-        self.addTab(self.graphView, "graph")
+        self.addTab(self.graphView, "Graph")
 
         self.setDocumentMode(True)
         self.tabBar().setExpanding(True)

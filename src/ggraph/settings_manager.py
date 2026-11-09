@@ -1,4 +1,5 @@
 import os.path as osPath
+from typing import Any, cast
 
 from PySide6 import QtCore, QtWidgets
 from PySide6.QtCore import QFileSystemWatcher
@@ -30,6 +31,21 @@ class SettingsManager(QtCore.QSettings):
             self.watcher.addPath(self.fileName())
 
         self.setupTheme()
+
+    def getGraphHSteps(self) -> int:
+        return int(cast(Any, self.value("graph/hSteps", 120)))
+
+    def getGraphMinX(self) -> float:
+        return float(cast(Any, self.value("graph/minX", -500)))
+
+    def getGraphMaxX(self) -> float:
+        return float(cast(Any, self.value("graph/maxX", 500)))
+
+    def getGraphMinY(self) -> float:
+        return float(cast(Any, self.value("graph/minY", -500)))
+
+    def getGraphMaxY(self) -> float:
+        return float(cast(Any, self.value("graph/maxY", 500)))
 
     def useSystemTheme(self) -> bool:
         return self.value("ui/useSystemTheme", "true") == "true"
