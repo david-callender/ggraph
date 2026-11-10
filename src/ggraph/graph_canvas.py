@@ -21,9 +21,11 @@ class GraphCanvas(QtWidgets.QWidget):
         self.graph()
         painter = QPainter(self)
 
-        painter.fillRect(self.rect(), QColor("#" + self.settings.getColorBackground()))
-
-        painter.setPen(QPen(QColor("#" + self.settings.getColorPrimary()), 3))
+        if not self.settings.useSystemTheme():
+            painter.fillRect(
+                self.rect(), QColor("#" + self.settings.getColorBackground())
+            )
+            painter.setPen(QPen(QColor("#" + self.settings.getColorPrimary()), 3))
 
         if len(self.points) == 0:
             painter.end()
@@ -111,7 +113,3 @@ class GraphCanvas(QtWidgets.QWidget):
             y = self.funcOfX(x) + minY
             self.points[i] = (x, y)
         print(self.points[-1])
-
-
-    // we need to decide how to parse and evaluate equations
-    // we also need to determine what to do about holes/jumps, discontinuities in the graph.
