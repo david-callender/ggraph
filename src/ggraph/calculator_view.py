@@ -2,11 +2,12 @@ from PySide6 import QtCore, QtWidgets
 from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import QVBoxLayout
 
+from ggraph.errors import LexerError, ParserError
 from ggraph.history_line import HistoryLine
 from ggraph.history_manager import HistoryManager
 from ggraph.interpreter import Env, InterpreterError, interpret
-from ggraph.lexer import Lexer, LexerError
-from ggraph.parser import Parser, ParserError
+from ggraph.lexer import Lexer
+from ggraph.parser import Parser
 from ggraph.settings_manager import SettingsManager
 
 
