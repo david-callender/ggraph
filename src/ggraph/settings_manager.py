@@ -35,6 +35,9 @@ class SettingsManager(QtCore.QSettings):
     def getGraphHSteps(self) -> int:
         return int(cast(Any, self.value("graph/hSteps", 1000)))
 
+    def getGraphLineWidth(self) -> int:
+        return int(cast(Any, self.value("graph/lineWidth", 3)))
+
     def getGraphMinX(self) -> float:
         return float(cast(Any, self.value("graph/minX", -100)))
 

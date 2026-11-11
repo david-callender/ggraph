@@ -17,14 +17,19 @@ class GraphCanvas(QtWidgets.QWidget):
 
     @override
     def paintEvent(self, event) -> None:
-        self.graph()
+        self.calculatePoints()
         painter = QPainter(self)
 
         if not self.settings.useSystemTheme():
             painter.fillRect(
                 self.rect(), QColor("#" + self.settings.getColorBackground())
             )
-            painter.setPen(QPen(QColor("#" + self.settings.getColorPrimary()), 3))
+        painter.setPen(
+            QPen(
+                QColor(self.getGraphColor(0)),
+                self.settings.getGraphLineWidth(),
+            )
+        )
 
         if len(self.points) == 0:
             painter.end()
@@ -98,7 +103,7 @@ class GraphCanvas(QtWidgets.QWidget):
     def funcOfX(self, x: float) -> float:
         return (x + 50) ** 2 - 50
 
-    def graph(self) -> None:
+    def calculatePoints(self) -> None:
         steps = self.settings.getGraphHSteps()
         self.points = [(0, 0)] * steps
 
@@ -112,3 +117,28 @@ class GraphCanvas(QtWidgets.QWidget):
             y = self.funcOfX(x)
             self.points[i] = (x, y)
         print(self.points[-1])
+
+    def getGraphColor(self, eqnId: int) -> str:
+        if self.settings.useSystemTheme():
+            eqnId = eqnId % 5
+            match eqnId:
+                case 0:
+                    return "RED"
+                case 1:
+                    return "BLUE"
+                case 2:
+                    return "ORCHID"
+                case 3:
+                    return "GREEN"
+                case 4:
+                    return "PERU"
+        else:
+            eqnId = eqnId % 3
+            match eqnId:
+                case 0:
+                    return "#" + self.settings.getColorPrimary()
+                case 1:
+                    return "#" + self.settings.getColorSecondary()
+                case 2:
+                    return "#" + self.settings.getColorOnSurface()
+        return "HOTPINK"
