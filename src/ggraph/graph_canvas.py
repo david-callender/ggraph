@@ -1,4 +1,3 @@
-import math
 from typing import override
 
 from PySide6 import QtWidgets
@@ -92,12 +91,12 @@ class GraphCanvas(QtWidgets.QWidget):
         x = ((x - minX) / graphWidth) * viewWidth
         y = ((y - minY) / graphHeight) * viewHeight
 
-        y = viewHeight / 2 - y
+        y = viewHeight - y
 
         return (x, y)
 
     def funcOfX(self, x: float) -> float:
-        return 50 * math.sin(x / 60)
+        return (x + 50) ** 2 - 50
 
     def graph(self) -> None:
         steps = self.settings.getGraphHSteps()
@@ -110,6 +109,6 @@ class GraphCanvas(QtWidgets.QWidget):
 
         for i in range(steps):
             x = (i / steps) * graphWidth + minX
-            y = self.funcOfX(x) + minY
+            y = self.funcOfX(x)
             self.points[i] = (x, y)
         print(self.points[-1])

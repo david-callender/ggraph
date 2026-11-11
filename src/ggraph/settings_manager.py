@@ -33,19 +33,19 @@ class SettingsManager(QtCore.QSettings):
         self.setupTheme()
 
     def getGraphHSteps(self) -> int:
-        return int(cast(Any, self.value("graph/hSteps", 120)))
+        return int(cast(Any, self.value("graph/hSteps", 1000)))
 
     def getGraphMinX(self) -> float:
-        return float(cast(Any, self.value("graph/minX", -500)))
+        return float(cast(Any, self.value("graph/minX", -100)))
 
     def getGraphMaxX(self) -> float:
-        return float(cast(Any, self.value("graph/maxX", 500)))
+        return float(cast(Any, self.value("graph/maxX", 100)))
 
     def getGraphMinY(self) -> float:
-        return float(cast(Any, self.value("graph/minY", -500)))
+        return float(cast(Any, self.value("graph/minY", -100)))
 
     def getGraphMaxY(self) -> float:
-        return float(cast(Any, self.value("graph/maxY", 500)))
+        return float(cast(Any, self.value("graph/maxY", 100)))
 
     def useSystemTheme(self) -> bool:
         return self.value("ui/useSystemTheme", "true") == "true"
