@@ -153,6 +153,7 @@ class TokenType:
     FuncDef: Literal[9] = 9
     Negate: Literal[10] = 10
     VarAssign: Literal[11] = 11
+    VarAssignEnd: Literal[12] = 12
 
 
 class TokenNumLit:
@@ -264,6 +265,17 @@ class TokenVarAssign:
         self.body = body
 
 
+class TokenVarAssignEnd:
+    tag = TokenType.VarAssignEnd
+    name: str
+
+    def __init__(self, name: str):
+        self.name = name
+
+    def __str__(self) -> str:
+        return "VarAssignEnd"
+
+
 type Token = (
     TokenNumLit
     | TokenVar
@@ -277,4 +289,5 @@ type Token = (
     | TokenFuncDef
     | TokenNegate
     | TokenVarAssign
+    | TokenVarAssignEnd
 )

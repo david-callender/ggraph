@@ -2,6 +2,7 @@ from typing import assert_never
 
 from ggraph.builtins import construct_builtin_map, safePow
 from ggraph.errors import InterpreterError
+from ggraph.parser import TokenVarAssignEnd
 from ggraph.tokens import Token, TokenFuncEnd, TokenType
 
 type Num = complex
@@ -43,7 +44,7 @@ class Env:
             env = env.parent
 
 
-def interpret(program: list[Token], start_env: Env) -> Num:
+def interpret(program: list[Token], start_env: Env) -> Num | None:
     builtins = construct_builtin_map()
 
     stack = []
@@ -180,6 +181,14 @@ def interpret(program: list[Token], start_env: Env) -> Num:
             case TokenType.Negate:
                 a = pop_float()
                 stack.append(-a)
+
+            case TokenType.VarAssign:
+                print(token.body)
+                program.append(TokenVarAssignEnd(token.name))
+                program.extend(token.body)
+
+            case TokenType.VarAssignEnd:
+                env.vars[token.name] = stack[-1]
 
             case _:
                 assert_never(token.tag)
