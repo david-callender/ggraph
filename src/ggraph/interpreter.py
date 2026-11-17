@@ -4,6 +4,8 @@ from ggraph.builtins import construct_builtin_map, safePow
 from ggraph.errors import InterpreterError
 from ggraph.tokens import Token, TokenFuncEnd, TokenType
 
+type Num = complex
+
 
 class RuntimeFunc:
     name: str
@@ -18,7 +20,7 @@ class RuntimeFunc:
 
 class Env:
     parent: Env | None
-    vars: dict[str, float]
+    vars: dict[str, Num]
     funcs: dict[str, RuntimeFunc]
 
     def __init__(self, parent: Env | None):
@@ -26,7 +28,7 @@ class Env:
         self.vars = {}
         self.funcs = {}
 
-    def search_var(self, name: str) -> float | None:
+    def search_var(self, name: str) -> Num | None:
         env = self
         while env is not None:
             if name in env.vars:
@@ -41,7 +43,7 @@ class Env:
             env = env.parent
 
 
-def interpret(program: list[Token], start_env: Env) -> float:
+def interpret(program: list[Token], start_env: Env) -> Num:
     builtins = construct_builtin_map()
 
     stack = []
@@ -51,7 +53,13 @@ def interpret(program: list[Token], start_env: Env) -> float:
             raise InterpreterError(
                 "misaligned stack, tried to pop a float from an empty stack"
             )
-        return stack.pop()
+        value = stack.pop()
+        if isinstance(value, (int, float)):
+            return value
+
+        raise InterpreterError(
+            f"expected float, got {value} of type {type(value).__name__}"
+        )
 
     def pop_int() -> int:
         if len(stack) == 0:
@@ -59,11 +67,25 @@ def interpret(program: list[Token], start_env: Env) -> float:
                 "misaligned stack, tried to pop an int from an empty stack"
             )
         value = stack.pop()
-        int_value = int(value)
-        if value != float(int_value):
-            print(f"Expected int to function {builtin.name}")
+        if isinstance(value, (int, float)):
+            int_value = int(value)
+            if value != float(int_value):
+                raise InterpreterError(
+                    f"Expected int to function {builtin.name}, got {value}"
+                )
 
-        return int_value
+            return int_value
+
+        raise InterpreterError(
+            f"expected int, got {value} of type {type(value).__name__}"
+        )
+
+    def pop_complex() -> complex:
+        if len(stack) == 0:
+            raise InterpreterError(
+                "misaligned stack, tried to pop a float from an empty stack"
+            )
+        return stack.pop()
 
     env = start_env
 
@@ -80,28 +102,28 @@ def interpret(program: list[Token], start_env: Env) -> float:
                 stack.append(value)
 
             case TokenType.Add:
-                a = pop_float()
-                b = pop_float()
+                a = pop_complex()
+                b = pop_complex()
                 stack.append(b + a)
 
             case TokenType.Sub:
-                a = pop_float()
-                b = pop_float()
+                a = pop_complex()
+                b = pop_complex()
                 stack.append(b - a)
 
             case TokenType.Mul:
-                a = pop_float()
-                b = pop_float()
+                a = pop_complex()
+                b = pop_complex()
                 stack.append(b * a)
 
             case TokenType.Div:
-                a = pop_float()
-                b = pop_float()
+                a = pop_complex()
+                b = pop_complex()
                 stack.append(b / a)
 
             case TokenType.Pow:
-                a = pop_float()
-                b = pop_float()
+                a = pop_complex()
+                b = pop_complex()
                 stack.append(safePow(b, a))
 
             case TokenType.FuncCall:
@@ -109,19 +131,25 @@ def interpret(program: list[Token], start_env: Env) -> float:
                     builtin = builtins[token.name]
 
                     match builtin.typed_impl:
-                        case ("float", impl):
+                        case ("float->float", impl):
                             stack.append(impl(pop_float()))
-                        case ("float,float", impl):
+                        case ("float,float->float", impl):
                             a = pop_float()
                             b = pop_float()
                             stack.append(impl(b, a))
-                        case ("float,int", impl):
+                        case ("float,int->float", impl):
                             a = pop_int()
                             b = pop_float()
                             stack.append(impl(b, a))
-                        case ("int,int", impl):
+                        case ("int,int->float", impl):
                             a = pop_int()
                             b = pop_int()
+                            stack.append(impl(b, a))
+                        case ("complex->float", impl):
+                            stack.append(impl(pop_complex()))
+                        case ("complex,complex->complex", impl):
+                            a = pop_complex()
+                            b = pop_complex()
                             stack.append(impl(b, a))
                         case _:
                             assert_never(builtin.typed_impl)

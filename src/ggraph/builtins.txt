@@ -37,3 +37,6 @@ coth(n: float) -> float
 arccsch(n: float) -> float
 arcsech(n: float) -> float
 arccoth(n: float) -> float
+
+mag(z: complex) -> float
+arg(z: complex) -> float

@@ -1,3 +1,4 @@
+import cmath
 import math
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -12,16 +13,21 @@ type ArgType = Literal["float", "int"]
 class Builtin:
     name: str
     typed_impl: (
-        tuple[Literal["float"], Callable[[float], float]]
-        | tuple[Literal["float,float"], Callable[[float, float], float]]
-        | tuple[Literal["float,int"], Callable[[float, int], float]]
-        | tuple[Literal["int,int"], Callable[[int, int], float]]
+        tuple[Literal["float->float"], Callable[[float], float]]
+        | tuple[Literal["float,float->float"], Callable[[float, float], float]]
+        | tuple[Literal["float,int->float"], Callable[[float, int], float]]
+        | tuple[Literal["int,int->float"], Callable[[int, int], float]]
+        | tuple[Literal["complex->float"], Callable[[complex], float]]
+        | tuple[
+            Literal["complex,complex->complex"],
+            Callable[[complex, complex], complex],
+        ]
     )
 
 
-def safePow(base: float, power: float) -> float:
+def safePow(base: complex, power: complex) -> complex:
     ans = base**power
-    if isinstance(ans, (int, float)):
+    if isinstance(ans, (int, float, complex)):
         return ans
     raise InterpreterError("Invalid arguments to pow")
 
@@ -30,7 +36,7 @@ def gg_sqrt(n: float) -> float:
     return math.sqrt(n)
 
 
-def gg_root(power, base: float) -> float:
+def gg_root(power: complex, base: complex) -> complex:
     return safePow(base, 1.0 / power)
 
 
@@ -182,46 +188,56 @@ def gg_arccoth(n: float) -> float:
     return math.atanh(1.0 / n)
 
 
+def gg_mag(z: complex) -> float:
+    return abs(z)
+
+
+def gg_arg(z: complex) -> float:
+    return cmath.phase(z) % (2 * math.pi)
+
+
 builtins: list[Builtin] = [
-    Builtin("Sqrt", ("float", gg_sqrt)),
-    Builtin("Root", ("float,float", gg_root)),
-    Builtin("Min", ("float,float", gg_min)),
-    Builtin("Max", ("float,float", gg_max)),
-    Builtin("Abs", ("float", gg_abs)),
-    Builtin("Round", ("float,int", gg_round)),
-    Builtin("Int", ("float", gg_int)),
-    Builtin("Truncate", ("float", gg_truncate)),
-    Builtin("Lcm", ("int,int", gg_lcm)),
-    Builtin("Gcd", ("int,int", gg_gcd)),
-    Builtin("Npr", ("int,int", gg_npr)),
-    Builtin("Ncr", ("int,int", gg_ncr)),
-    Builtin("Exp", ("float", gg_exp)),
-    Builtin("Log", ("float", gg_log)),
-    Builtin("Ln", ("float", gg_ln)),
-    Builtin("Sin", ("float", gg_sin)),
-    Builtin("Cos", ("float", gg_cos)),
-    Builtin("Tan", ("float", gg_tan)),
-    Builtin("Arcsin", ("float", gg_arcsin)),
-    Builtin("Arccos", ("float", gg_arccos)),
-    Builtin("Arctan", ("float", gg_arctan)),
-    Builtin("Sinh", ("float", gg_sinh)),
-    Builtin("Cosh", ("float", gg_cosh)),
-    Builtin("Tanh", ("float", gg_tanh)),
-    Builtin("Arcsinh", ("float", gg_arcsinh)),
-    Builtin("Arccosh", ("float", gg_arccosh)),
-    Builtin("Arctanh", ("float", gg_arctanh)),
-    Builtin("Csc", ("float", gg_csc)),
-    Builtin("Sec", ("float", gg_sec)),
-    Builtin("Cot", ("float", gg_cot)),
-    Builtin("Arccsc", ("float", gg_arccsc)),
-    Builtin("Arcsec", ("float", gg_arcsec)),
-    Builtin("Arccot", ("float", gg_arccot)),
-    Builtin("Csch", ("float", gg_csch)),
-    Builtin("Sech", ("float", gg_sech)),
-    Builtin("Coth", ("float", gg_coth)),
-    Builtin("Arccsch", ("float", gg_arccsch)),
-    Builtin("Arcsech", ("float", gg_arcsech)),
-    Builtin("Arccoth", ("float", gg_arccoth)),
+    Builtin("Sqrt", ("float->float", gg_sqrt)),
+    Builtin("Root", ("complex,complex->complex", gg_root)),
+    Builtin("Min", ("float,float->float", gg_min)),
+    Builtin("Max", ("float,float->float", gg_max)),
+    Builtin("Abs", ("float->float", gg_abs)),
+    Builtin("Round", ("float,int->float", gg_round)),
+    Builtin("Int", ("float->float", gg_int)),
+    Builtin("Truncate", ("float->float", gg_truncate)),
+    Builtin("Lcm", ("int,int->float", gg_lcm)),
+    Builtin("Gcd", ("int,int->float", gg_gcd)),
+    Builtin("Npr", ("int,int->float", gg_npr)),
+    Builtin("Ncr", ("int,int->float", gg_ncr)),
+    Builtin("Exp", ("float->float", gg_exp)),
+    Builtin("Log", ("float->float", gg_log)),
+    Builtin("Ln", ("float->float", gg_ln)),
+    Builtin("Sin", ("float->float", gg_sin)),
+    Builtin("Cos", ("float->float", gg_cos)),
+    Builtin("Tan", ("float->float", gg_tan)),
+    Builtin("Arcsin", ("float->float", gg_arcsin)),
+    Builtin("Arccos", ("float->float", gg_arccos)),
+    Builtin("Arctan", ("float->float", gg_arctan)),
+    Builtin("Sinh", ("float->float", gg_sinh)),
+    Builtin("Cosh", ("float->float", gg_cosh)),
+    Builtin("Tanh", ("float->float", gg_tanh)),
+    Builtin("Arcsinh", ("float->float", gg_arcsinh)),
+    Builtin("Arccosh", ("float->float", gg_arccosh)),
+    Builtin("Arctanh", ("float->float", gg_arctanh)),
+    Builtin("Csc", ("float->float", gg_csc)),
+    Builtin("Sec", ("float->float", gg_sec)),
+    Builtin("Cot", ("float->float", gg_cot)),
+    Builtin("Arccsc", ("float->float", gg_arccsc)),
+    Builtin("Arcsec", ("float->float", gg_arcsec)),
+    Builtin("Arccot", ("float->float", gg_arccot)),
+    Builtin("Csch", ("float->float", gg_csch)),
+    Builtin("Sech", ("float->float", gg_sech)),
+    Builtin("Coth", ("float->float", gg_coth)),
+    Builtin("Arccsch", ("float->float", gg_arccsch)),
+    Builtin("Arcsech", ("float->float", gg_arcsech)),
+    Builtin("Arccoth", ("float->float", gg_arccoth)),
+    Builtin("Mag", ("complex->float", gg_mag)),
+    Builtin("Arg", ("complex->float", gg_arg)),
 ]
 
 
