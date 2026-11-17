@@ -183,7 +183,6 @@ def interpret(program: list[Token], start_env: Env) -> Num | None:
                 stack.append(-a)
 
             case TokenType.VarAssign:
-                print(token.body)
                 program.append(TokenVarAssignEnd(token.name))
                 program.extend(token.body)
 
