@@ -1,7 +1,10 @@
+from collections.abc import Iterable, Iterator
+
+from more_itertools import peekable
+
+from ggraph.errors import ParserError
 from ggraph.lexer import *
 from ggraph.tokens import *
-from collections.abc import Iterable, Iterator
-from more_itertools import peekable
 
 
 def lexeme_to_token(lexeme: Lexeme) -> Token:
@@ -22,10 +25,6 @@ def lexeme_to_token(lexeme: Lexeme) -> Token:
         case LexemeType.UnaryMinus:
             return TokenNegate()
     raise ParserError(f"Non-simple token provided to lexeme_to_token: {lexeme}")
-
-
-class ParserError(Exception):
-    pass
 
 
 class Parser:

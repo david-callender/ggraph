@@ -2,6 +2,7 @@ from collections.abc import Iterator
 
 from more_itertools import peekable
 
+from ggraph.errors import LexerError
 from ggraph.tokens import (
     Lexeme,
     LexemeCaret,
@@ -16,10 +17,6 @@ from ggraph.tokens import (
     LexemeSlash,
     LexemeStar,
 )
-
-
-class LexerError(Exception):
-    pass
 
 
 class Lexer:
