@@ -93,7 +93,7 @@ class Parser:
 
                 # Clear the output so the VarAssign token lives alone
                 self.output = []
-                self.output.append(TokenVarAssign(left_side[0].name, body))
+                self.output.append(TokenVarAssign(left_side[0].name, body[::-1]))
 
             case l if l > 1:
                 # After this, only the args should remain
@@ -118,7 +118,9 @@ class Parser:
 
                 # Clear the output so that the FuncDef token lives alone
                 self.output = []
-                self.output.append(TokenFuncDef(func_token.name, args_strings, body))
+                self.output.append(
+                    TokenFuncDef(func_token.name, args_strings, body[::-1])
+                )
 
     def parse_close_paren(self, last_lexeme: Lexeme | None) -> None:
         if last_lexeme and last_lexeme.tag == LexemeType.OpenParen:
