@@ -15,6 +15,8 @@ class CalculatorView(QtWidgets.QWidget):
     def __init__(self, settings: SettingsManager) -> None:
         super().__init__()
 
+        self.root_env = Env(None)
+
         self.settings = settings
 
         self.mathsBox = QtWidgets.QLineEdit("")
@@ -47,8 +49,7 @@ class CalculatorView(QtWidgets.QWidget):
             l = Lexer(input)
             p = Parser(l).parse()
             p.reverse()
-            env = Env(None)
-            return (str(interpret(p, env)), False)
+            return (str(interpret(p, self.root_env)), False)
         except (LexerError, ParserError, InterpreterError, ZeroDivisionError) as e:
             return (str(e), True)
 

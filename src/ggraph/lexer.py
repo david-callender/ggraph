@@ -96,6 +96,11 @@ class Lexer:
         next_char = self.expression.peek()
         name = ""
 
+        # Only take one character for lowercase variable names
+        if next_char.islower():
+            name += next(self.expression)
+            return LexemeName(name)
+
         while next_char and next_char.isalpha():
             next(self.expression)
             name += next_char

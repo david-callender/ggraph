@@ -184,5 +184,7 @@ def interpret(program: list[Token], start_env: Env) -> Num:
             case _:
                 assert_never(token.tag)
 
-    result = stack[0]
-    return result
+    if len(stack) == 0:
+        return None
+    else:
+        return stack[0]
