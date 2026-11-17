@@ -43,7 +43,7 @@ class Env:
             env = env.parent
 
 
-def interpret(program: list[Token], start_env: Env) -> float:
+def interpret(program: list[Token], start_env: Env) -> float | None:
     stack = []
 
     env = start_env
@@ -113,5 +113,7 @@ def interpret(program: list[Token], start_env: Env) -> float:
             case _:
                 assert_never(token.tag)
 
-    result = stack[0]
-    return result
+    if len(stack) == 0:
+        return None
+    else:
+        return stack[0]
