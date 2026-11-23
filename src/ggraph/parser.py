@@ -33,11 +33,12 @@ class Parser:
     output: list[Token]
     last_func_args: int
 
-    def __init__(self, lexeme_stream: Iterable[Lexeme]) -> None:
+    def __init__(self, lexeme_stream: Iterable[Lexeme], implicit=False) -> None:
         self.lexeme_stream = peekable(lexeme_stream)
         self.stack = []
         self.output = []
         self.last_func_args = 1
+        self.is_implicit = implicit
 
     def __iter__(self) -> Iterator[Token]:
         return iter(self.parse())
@@ -70,19 +71,17 @@ class Parser:
 
             last_lexeme = lexeme
 
-        # Dump the stack from top to bottom into the output
-        for lexeme in self.stack[::-1]:
-            # Only simple operators should be left by now.
-            if lexeme.tag != LexemeType.OpenParen:
-                self.output.append(lexeme_to_token(lexeme))
-        # Clear the stack, which is necessary to prevent parse_equals from injecting spurious tokens
-        self.stack = []
+        self.reverse_stack_to_output()
 
         return self.output
 
     def parse_equals(self) -> None:
         left_side = self.output[::]
         self.output = []
+
+        if self.is_implicit:
+            self.parse_implicit_equals()
+            return
 
         body = self.parse()
 
@@ -121,6 +120,17 @@ class Parser:
                 self.output.append(
                     TokenFuncDef(func_token.name, args_strings, body[::-1])
                 )
+
+    def parse_implicit_equals(self):
+        # Since this is an implicit equation, we reverse the stack into the output before starting to parse
+        # the right hand side.
+        self.reverse_stack_to_output()
+
+        left_side = self.output[::]
+        self.output = []
+        right_side = self.parse()
+
+        return left_side + right_side + [TokenSub()]
 
     def parse_close_paren(self, last_lexeme: Lexeme | None) -> None:
         if last_lexeme and last_lexeme.tag == LexemeType.OpenParen:
@@ -232,3 +242,12 @@ class Parser:
             stack_top_op.precedence == op.precedence
             and stack_top_op.associativity == LexemeAssociativity.Left
         )
+
+    def reverse_stack_to_output(self):
+        # Dump the stack from top to bottom into the output
+        for lexeme in self.stack[::-1]:
+            # Only simple operators should be left by now.
+            if lexeme.tag != LexemeType.OpenParen:
+                self.output.append(lexeme_to_token(lexeme))
+                # Clear the stack, which is necessary to prevent parse_equals from injecting spurious tokens
+        self.stack = []
