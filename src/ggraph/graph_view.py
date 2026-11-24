@@ -5,9 +5,6 @@ from PySide6.QtWidgets import QSizePolicy
 
 from ggraph.equation_line import EquationLine
 from ggraph.graph_canvas import GraphCanvas
-from ggraph.interpreter import Env, InterpreterError, interpret
-from ggraph.lexer import Lexer, LexerError
-from ggraph.parser import Parser, ParserError
 from ggraph.settings_manager import SettingsManager
 from ggraph.tab_interface import TabInterface
 
@@ -21,9 +18,7 @@ class GraphView(TabInterface):
         self.graphScroller = QtWidgets.QScrollArea()
         self.graphHolder = GraphCanvas(self.settings)
 
-        # self.equationScroller = QtWidgets.QScrollArea()
-        # self.equationHolder = QWidget()
-        self.equationLine = EquationLine()
+        self.equationLine = EquationLine(self.graphHolder, 0)
 
         # self.graphLayout = QVBoxLayout(self.graphHolder)
         # self.graphLayout.addStretch()
@@ -48,18 +43,8 @@ class GraphView(TabInterface):
 
     @override
     def onFocused(self) -> None:
-        pass
+        self.equationLine.inputLine.setFocus()
 
     @override
     def onUnfocused(self) -> None:
         pass
-
-    def parseMath(self, input: str) -> tuple[str, bool]:
-        try:
-            l = Lexer(input)
-            p = Parser(l).parse()
-            p.reverse()
-            env = Env(None)
-            return (str(interpret(p, env)), False)
-        except (LexerError, ParserError, InterpreterError, ZeroDivisionError) as e:
-            return (str(e), True)

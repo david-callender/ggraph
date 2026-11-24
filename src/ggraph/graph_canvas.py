@@ -17,9 +17,9 @@ class GraphCanvas(QtWidgets.QWidget):
         self.settings = settings
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.points: list[tuple[float, float]] = []
+        self.inputStrings: list[str] = [""]
 
-    @override
-    def paintEvent(self, event) -> None:
+    def drawGraph(self) -> None:
         self.calculatePoints()
         painter = QPainter(self)
 
@@ -62,6 +62,10 @@ class GraphCanvas(QtWidgets.QWidget):
             painter.drawLine(line)
 
         painter.end()
+
+    @override
+    def paintEvent(self, event) -> None:
+        self.drawGraph()
 
     def convertGraphPointListToViewPointList(
         self, points: list[tuple[float, float]]
@@ -114,7 +118,7 @@ class GraphCanvas(QtWidgets.QWidget):
             for i in range(len(self.points)):
                 x = self.points[i][0]
                 env.vars["x"] = x
-                self.points[i] = (x, float(interpret(p, env)))
+                self.points[i] = (x, float(interpret(p[:], env)))
         except (LexerError, ParserError, InterpreterError, ZeroDivisionError) as e:
             print(e)
 
@@ -134,7 +138,7 @@ class GraphCanvas(QtWidgets.QWidget):
                 0,
             )  # 0 is a placeholder value here, until replaced with actual value
 
-        self.parseMath("7")
+        self.parseMath(self.inputStrings[0])
 
     def getGraphColor(self, eqnId: int) -> str:
         if self.settings.useSystemTheme():
