@@ -5,6 +5,9 @@ from PySide6.QtCore import QLineF
 from PySide6.QtGui import QColor, QPainter, QPen
 from PySide6.QtWidgets import QSizePolicy
 
+from ggraph.interpreter import Env, InterpreterError, interpret
+from ggraph.lexer import Lexer, LexerError
+from ggraph.parser import Parser, ParserError
 from ggraph.settings_manager import SettingsManager
 
 
@@ -100,8 +103,20 @@ class GraphCanvas(QtWidgets.QWidget):
 
         return (x, y)
 
-    def funcOfX(self, x: float) -> float:
-        return (x + 50) ** 2 - 50
+    def parseMath(self, input: str) -> None:
+        try:
+            l = Lexer(input)
+            p = Parser(l).parse()
+            print(p)
+            p.reverse()
+
+            env = Env(None)
+            for i in range(len(self.points)):
+                x = self.points[i][0]
+                env.vars["x"] = x
+                self.points[i] = (x, float(interpret(p, env)))
+        except (LexerError, ParserError, InterpreterError, ZeroDivisionError) as e:
+            print(e)
 
     def calculatePoints(self) -> None:
         steps = self.settings.getGraphHSteps()
@@ -114,9 +129,12 @@ class GraphCanvas(QtWidgets.QWidget):
 
         for i in range(steps):
             x = (i / steps) * graphWidth + minX
-            y = self.funcOfX(x)
-            self.points[i] = (x, y)
-        print(self.points[-1])
+            self.points[i] = (
+                x,
+                0,
+            )  # 0 is a placeholder value here, until replaced with actual value
+
+        self.parseMath("7")
 
     def getGraphColor(self, eqnId: int) -> str:
         if self.settings.useSystemTheme():

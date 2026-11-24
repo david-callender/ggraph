@@ -38,10 +38,13 @@ class GraphView(TabInterface):
         self.graphScroller.setWidget(self.graphHolder)
         self.graphScroller.setWidgetResizable(True)
 
-        layout = QtWidgets.QVBoxLayout(self)
+        if self.width() < self.height():
+            layout = QtWidgets.QHBoxLayout(self)
+        else:
+            layout = QtWidgets.QVBoxLayout(self)
 
-        layout.addWidget(self.graphScroller)
         layout.addWidget(self.equationLine)
+        layout.addWidget(self.graphScroller)
 
     @override
     def onFocused(self) -> None:

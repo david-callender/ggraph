@@ -1,30 +1,30 @@
 from PySide6 import QtCore, QtWidgets
-from PySide6.QtWidgets import QFrame, QVBoxLayout
+from PySide6.QtWidgets import QFrame, QHBoxLayout
 
 
 class EquationLine(QFrame):
     def __init__(self) -> None:
         super().__init__()
 
-        vLayout = QVBoxLayout()
+        hLayout = QHBoxLayout()
 
         self.inputLine = QtWidgets.QLineEdit(
             "", alignment=QtCore.Qt.AlignmentFlag.AlignLeft
         )
+        # self.inputLine.keyPressEvent.connect
 
-        self.outputLabel = QtWidgets.QLabel(
-            "", alignment=QtCore.Qt.AlignmentFlag.AlignRight
+        self.typeDropBox = QtWidgets.QComboBox()
+        self.typeDropBox.addItems(["Y=", "X=", "Implicit", "Def", "Auto"])
+
+        hLayout.addWidget(
+            self.typeDropBox, -1, alignment=QtCore.Qt.AlignmentFlag.AlignLeft
         )
+        hLayout.addWidget(self.inputLine, 900)
 
-        vLayout.addWidget(self.inputLine, alignment=QtCore.Qt.AlignmentFlag.AlignTop)
-        vLayout.addWidget(
-            self.outputLabel, alignment=QtCore.Qt.AlignmentFlag.AlignBottom
-        )
-
-        self.setLayout(vLayout)
+        self.setLayout(hLayout)
 
     def themeOutputLabel(self, isError: bool) -> None:
         if isError:
-            self.outputLabel.setProperty("class", "label-error")
+            self.inputLine.setProperty("class", "label-error")
         else:
-            self.outputLabel.setProperty("class", "label-secondary")
+            self.inputLine.setProperty("class", "label-secondary")

@@ -72,8 +72,10 @@ class CalculatorView(TabInterface):
         newHistoryRow = HistoryLine(text, parsedResult[0])
         newHistoryRow.themeOutputLabel(parsedResult[1])
         self.historyLayout.addWidget(newHistoryRow)
+
         self.historyManager.addToCalcHistory(text)
-        self.historyManager.addToCalcHistory(parsedResult[0])
+        if not parsedResult[1]:  # add result to history on success
+            self.historyManager.addToCalcHistory(parsedResult[0])
 
         self.mathsBox.setText("")
 

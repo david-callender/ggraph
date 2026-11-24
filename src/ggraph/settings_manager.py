@@ -119,6 +119,7 @@ class SettingsManager(QtCore.QSettings):
                     background-color: #{self.getColorSurface()};
                     border: {self.getBorderRadiusSmall()}px solid #{self.getColorOnSurface()}; 
                     border-radius: {self.getRoundingRadiusSmall()}px;        
+                    padding: {self.getRoundingRadiusSmall()}px;
                 }}
                 QLabel {{
                     color: #{self.getColorOnSurface()};
@@ -144,6 +145,28 @@ class SettingsManager(QtCore.QSettings):
                     border: {self.getBorderRadiusBig()}px solid #{self.getColorOnPrimary()}; 
                     border-radius: {self.getRoundingRadiusBig()}px;        
                 }}
+
+                QComboBox {{
+                    color: #{self.getColorOnSurface()};
+                    background-color: #{self.getColorSurface()};
+                    border: {self.getBorderRadiusBig()}px solid #{self.getColorOnSurface()}; 
+                    border-radius: {self.getRoundingRadiusBig()}px;        
+                    padding: {self.getRoundingRadiusSmall()}px;
+                }}
+                QComboBox::item {{
+                    color: #{self.getColorOnBackground()};
+                    background-color: #{self.getColorBackground()};
+                    selection-background-color: #{self.getColorPrimary()};
+                    selection-color: #{self.getColorOnPrimary()};
+                }}
+                QComboBox::drop-down {{
+                    border-radius: {self.getRoundingRadiusBig()}px;        
+                }}
+                QAbstractItemView {{
+                    border-radius: {self.getRoundingRadiusSmall()}px;        
+                }}
+ 
+
 
 
                 QTabBar {{
