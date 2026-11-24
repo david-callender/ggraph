@@ -44,6 +44,9 @@ class Parser:
         return iter(self.parse())
 
     def parse(self) -> list[Token]:
+        if not self.lexeme_stream:
+            return self.output
+
         last_lexeme: Lexeme | None = None
         for lexeme in self.lexeme_stream:
             match lexeme.tag:
@@ -60,80 +63,79 @@ class Parser:
                 case LexemeType.Minus:
                     self.parse_minus(last_lexeme)
                 case LexemeType.Eq:
-                    self.parse_equals()
+                    if self.is_implicit:
+                        self.parse_implicit_equals()
+                    else:
+                        self.parse_equals()
                 # All of the special operators have now been dealt with,
                 # and we can parse the regular operators.
                 case _:
                     # Here it is safe to assume, as we have already checked for any other
                     # lexeme types, that lexeme is a LexemeOp. Thus, we change its type.
                     op: LexemeOp = lexeme
+                    self.prevent_duplicate_ops()
                     self.parse_op(op)
 
             last_lexeme = lexeme
 
         self.reverse_stack_to_output()
 
+        self.output.reverse()
         return self.output
 
     def parse_equals(self) -> None:
         left_side = self.output[::]
         self.output = []
-
-        if self.is_implicit:
-            self.parse_implicit_equals()
-            return
-
         body = self.parse()
 
         match len(left_side):
             case l if l == 1:
-                if left_side[0].tag != TokenType.Var:
-                    raise ParserError("Variable names must be lowercased")
-
-                # Clear the output so the VarAssign token lives alone
-                self.output = []
-                self.output.append(TokenVarAssign(left_side[0].name, body[::-1]))
-
+                self.parse_var_assign(left_side, body)
             case l if l > 1:
-                # After this, only the args should remain
-                # We must also check to make sure the func_token is actually a FuncCall
-                func_token = left_side.pop()
-                if func_token.tag != TokenType.FuncCall:
-                    raise ParserError("Function definition has bad syntax")
-                elif len(left_side) != func_token.num_args:
-                    raise ParserError(
-                        "Function definition has incorrect number of commas"
-                    )
+                self.parse_func_def(left_side, body)
 
-                # We also have to check that the args list consists only of variables
-                args: list[TokenVar] = left_side[::]
-                for tok in left_side:
-                    if tok.tag != TokenType.Var:
-                        raise ParserError(
-                            "Function definition has non-variable argument"
-                        )
+    def parse_var_assign(self, left_side: list[Token], body: list[Token]):
+        if left_side[0].tag != TokenType.Var:
+            raise ParserError("Variable names must be lowercased")
 
-                args_strings = [tok.name for tok in args]
+        # Clear the output so the VarAssign token lives alone
+        self.output = []
+        self.output.append(TokenVarAssign(left_side[0].name, body))
 
-                # Clear the output so that the FuncDef token lives alone
-                self.output = []
-                self.output.append(
-                    TokenFuncDef(func_token.name, args_strings, body[::-1])
-                )
+    def parse_func_def(self, left_side: list[Token], body: list[Token]):
+        # After this, only the args should remain
+        # We must also check to make sure the func_token is actually a FuncCall
+        func_token = left_side.pop()
+        if func_token.tag != TokenType.FuncCall:
+            raise ParserError("Function definition has bad syntax")
+        elif len(left_side) != func_token.num_args:
+            raise ParserError("Function definition has incorrect number of commas")
+
+        # We also have to check that the args list consists only of variables
+        args: list[TokenVar] = left_side[::]
+        for tok in left_side:
+            if tok.tag != TokenType.Var:
+                raise ParserError("Function definition has non-variable argument")
+
+        args_strings = [tok.name for tok in args]
+
+        # Clear the output so that the FuncDef token lives alone
+        self.output = []
+        self.output.append(TokenFuncDef(func_token.name, args_strings, body))
 
     def parse_implicit_equals(self):
         # Since this is an implicit equation, we reverse the stack into the output before starting to parse
         # the right hand side.
         self.reverse_stack_to_output()
 
-        left_side = self.output[::]
+        left_side = self.output[::-1]
         self.output = []
         right_side = self.parse()
 
-        return left_side + right_side + [TokenSub()]
+        self.output = left_side + right_side + [TokenSub()]
 
     def parse_close_paren(self, last_lexeme: Lexeme | None) -> None:
-        if last_lexeme and last_lexeme.tag == LexemeType.OpenParen:
+        if last_lexeme is not None and last_lexeme.tag == LexemeType.OpenParen:
             raise ParserError("Empty parentheses are not allowed")
 
         try:
@@ -186,13 +188,14 @@ class Parser:
         self.output.append(lexeme_to_token(lexeme))
 
     def parse_minus(self, last_lexeme: Lexeme | None) -> None:
-        if not last_lexeme or last_lexeme.tag not in [
+        if last_lexeme is None or last_lexeme.tag not in [
             LexemeType.NumLit,
             LexemeType.Name,
             LexemeType.CloseParen,
         ]:
             self.stack.append(LexemeUnaryMinus())
         else:
+            self.prevent_duplicate_ops()
             self.parse_op(LexemeMinus())
 
     def parse_op(self, lexeme: LexemeOp) -> None:
@@ -212,13 +215,20 @@ class Parser:
 
     def has_implicit_multiplication(self) -> bool:
         next_lexeme = self.lexeme_stream.peek(None)
-        if next_lexeme and next_lexeme.tag in [
+        return next_lexeme is not None and next_lexeme.tag in [
             LexemeType.NumLit,
             LexemeType.Name,
             LexemeType.OpenParen,
+        ]
+
+    def prevent_duplicate_ops(self) -> None:
+        if self.lexeme_stream.peek().tag in [
+            LexemeType.Plus,
+            LexemeType.Star,
+            LexemeType.Slash,
+            LexemeType.Caret,
         ]:
-            return True
-        return False
+            raise ParserError("Two operators cannot appear in a row")
 
     def stack_has_precedence(self, op: LexemeOp) -> bool:
         # If there's nothing on the stack, it doesn't have precedence

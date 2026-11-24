@@ -48,7 +48,6 @@ class CalculatorView(QtWidgets.QWidget):
         try:
             l = Lexer(input)
             p = Parser(l).parse()
-            p.reverse()
             return (str(interpret(p, self.root_env)), False)
         except (LexerError, ParserError, InterpreterError, ZeroDivisionError) as e:
             return (str(e), True)
