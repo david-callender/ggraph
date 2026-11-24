@@ -18,6 +18,7 @@ class LexemeType:
     CloseParen: Literal[8] = 8
     Comma: Literal[9] = 9
     Eq: Literal[10] = 10
+    UnaryMinus: Literal[11] = 11
 
 
 class LexemeNumLit:
@@ -27,6 +28,9 @@ class LexemeNumLit:
     def __init__(self, value):
         self.value = value
 
+    def __str__(self) -> str:
+        return str(self.value)
+
 
 class LexemeName:
     tag = LexemeType.Name
@@ -35,11 +39,17 @@ class LexemeName:
     def __init__(self, value):
         self.value = value
 
+    def __str__(self) -> str:
+        return str(self.value)
+
 
 class LexemePlus:
     tag = LexemeType.Plus
     precedence = 10
     associativity = LexemeAssociativity.Left
+
+    def __str__(self) -> str:
+        return "+"
 
 
 class LexemeMinus:
@@ -47,11 +57,17 @@ class LexemeMinus:
     precedence = 10
     associativity = LexemeAssociativity.Left
 
+    def __str__(self) -> str:
+        return "-"
+
 
 class LexemeStar:
     tag = LexemeType.Star
     precedence = 20
     associativity = LexemeAssociativity.Left
+
+    def __str__(self) -> str:
+        return "*"
 
 
 class LexemeSlash:
@@ -59,27 +75,51 @@ class LexemeSlash:
     precedence = 20
     associativity = LexemeAssociativity.Left
 
+    def __str__(self) -> str:
+        return "/"
+
 
 class LexemeCaret:
     tag = LexemeType.Caret
     precedence = 30
     associativity = LexemeAssociativity.Right
 
+    def __str__(self) -> str:
+        return "^"
+
 
 class LexemeOpenParen:
     tag = LexemeType.OpenParen
+
+    def __str__(self) -> str:
+        return "("
 
 
 class LexemeCloseParen:
     tag = LexemeType.CloseParen
 
+    def __str__(self) -> str:
+        return ")"
+
 
 class LexemeComma:
     tag = LexemeType.Comma
 
+    def __str__(self) -> str:
+        return ","
+
 
 class LexemeEq:
     tag = LexemeType.Eq
+
+    def __str__(self) -> str:
+        return "="
+
+
+class LexemeUnaryMinus:
+    tag = LexemeType.UnaryMinus
+    precedence = 40
+    associativity = LexemeAssociativity.Right
 
 
 type Lexeme = (
@@ -94,6 +134,7 @@ type Lexeme = (
     | LexemeCloseParen
     | LexemeComma
     | LexemeEq
+    | LexemeUnaryMinus
 )
 
 type LexemeOp = LexemePlus | LexemeMinus | LexemeStar | LexemeSlash | LexemeCaret
@@ -110,6 +151,9 @@ class TokenType:
     FuncCall: Literal[7] = 7
     FuncEnd: Literal[8] = 8
     FuncDef: Literal[9] = 9
+    Negate: Literal[10] = 10
+    VarAssign: Literal[11] = 11
+    VarAssignEnd: Literal[12] = 12
 
 
 class TokenNumLit:
@@ -119,6 +163,9 @@ class TokenNumLit:
     def __init__(self, value: float):
         self.value = value
 
+    def __str__(self) -> str:
+        return str(self.value)
+
 
 class TokenVar:
     tag = TokenType.Var
@@ -127,25 +174,43 @@ class TokenVar:
     def __init__(self, name: str):
         self.name = name
 
+    def __str__(self) -> str:
+        return str(self.name)
+
 
 class TokenAdd:
     tag = TokenType.Add
+
+    def __str__(self) -> str:
+        return "+"
 
 
 class TokenSub:
     tag = TokenType.Sub
 
+    def __str__(self) -> str:
+        return "-"
+
 
 class TokenMul:
     tag = TokenType.Mul
+
+    def __str__(self) -> str:
+        return "*"
 
 
 class TokenDiv:
     tag = TokenType.Div
 
+    def __str__(self) -> str:
+        return "/"
+
 
 class TokenPow:
     tag = TokenType.Pow
+
+    def __str__(self) -> str:
+        return "^"
 
 
 class TokenFuncCall:
@@ -157,9 +222,15 @@ class TokenFuncCall:
         self.name = name
         self.num_args = num_args
 
+    def __str__(self) -> str:
+        return f"FuncCall({self.name} {self.num_args})"
+
 
 class TokenFuncEnd:
     tag = TokenType.FuncEnd
+
+    def __str__(self) -> str:
+        return "FuncEnd"
 
 
 class TokenFuncDef:
@@ -173,6 +244,37 @@ class TokenFuncDef:
         self.args = args
         self.body = body
 
+    def __str__(self) -> str:
+        return f"FuncDef({self.name} {self.args} {self.body})"
+
+
+class TokenNegate:
+    tag = TokenType.Negate
+
+    def __str__(self):
+        return "⁻"
+
+
+class TokenVarAssign:
+    tag = TokenType.VarAssign
+    name: str
+    body: list[Token]
+
+    def __init__(self, name: str, body: list[Token]):
+        self.name = name
+        self.body = body
+
+
+class TokenVarAssignEnd:
+    tag = TokenType.VarAssignEnd
+    name: str
+
+    def __init__(self, name: str):
+        self.name = name
+
+    def __str__(self) -> str:
+        return "VarAssignEnd"
+
 
 type Token = (
     TokenNumLit
@@ -185,4 +287,7 @@ type Token = (
     | TokenFuncCall
     | TokenFuncEnd
     | TokenFuncDef
+    | TokenNegate
+    | TokenVarAssign
+    | TokenVarAssignEnd
 )

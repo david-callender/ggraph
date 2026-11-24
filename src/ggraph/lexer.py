@@ -1,24 +1,22 @@
 from collections.abc import Iterator
+
 from more_itertools import peekable
 
+from ggraph.errors import LexerError
 from ggraph.tokens import (
     Lexeme,
-    LexemeNumLit,
-    LexemeName,
-    LexemePlus,
-    LexemeMinus,
-    LexemeStar,
-    LexemeSlash,
     LexemeCaret,
-    LexemeOpenParen,
     LexemeCloseParen,
     LexemeComma,
     LexemeEq,
+    LexemeMinus,
+    LexemeName,
+    LexemeNumLit,
+    LexemeOpenParen,
+    LexemePlus,
+    LexemeSlash,
+    LexemeStar,
 )
-
-
-class LexerError(Exception):
-    pass
 
 
 class Lexer:
@@ -36,7 +34,7 @@ class Lexer:
     def next_tok(self) -> Lexeme:
         next_char = self.expression.peek()
 
-        if next_char.isnumeric():
+        if next_char.isnumeric() or next_char == ".":
             return self.lex_num_literal()
         elif next_char.isalpha():
             return self.lex_name()
@@ -97,6 +95,11 @@ class Lexer:
     def lex_name(self) -> LexemeName:
         next_char = self.expression.peek()
         name = ""
+
+        # Only take one character for lowercase variable names
+        if next_char.islower():
+            name += next(self.expression)
+            return LexemeName(name)
 
         while next_char and next_char.isalpha():
             next(self.expression)

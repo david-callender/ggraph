@@ -4,11 +4,12 @@ from PySide6 import QtCore, QtWidgets
 from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import QVBoxLayout
 
+from ggraph.errors import LexerError, ParserError
 from ggraph.history_line import HistoryLine
 from ggraph.history_manager import HistoryManager
 from ggraph.interpreter import Env, InterpreterError, interpret
-from ggraph.lexer import Lexer, LexerError
-from ggraph.parser import Parser, ParserError
+from ggraph.lexer import Lexer
+from ggraph.parser import Parser
 from ggraph.settings_manager import SettingsManager
 from ggraph.tab_interface import TabInterface
 
@@ -16,6 +17,8 @@ from ggraph.tab_interface import TabInterface
 class CalculatorView(TabInterface):
     def __init__(self, settings: SettingsManager) -> None:
         super().__init__()
+
+        self.root_env = Env(None)
 
         self.settings = settings
 
@@ -44,8 +47,7 @@ class CalculatorView(TabInterface):
             l = Lexer(input)
             p = Parser(l).parse()
             p.reverse()
-            env = Env(None)
-            return (str(interpret(p, env)), False)
+            return (str(interpret(p, self.root_env)), False)
         except (LexerError, ParserError, InterpreterError, ZeroDivisionError) as e:
             return (str(e), True)
 

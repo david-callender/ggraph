@@ -1,7 +1,10 @@
+from collections.abc import Iterable, Iterator
+
+from more_itertools import peekable
+
+from ggraph.errors import ParserError
 from ggraph.lexer import *
 from ggraph.tokens import *
-from collections.abc import Iterable, Iterator
-from more_itertools import peekable
 
 
 def lexeme_to_token(lexeme: Lexeme) -> Token:
@@ -19,11 +22,9 @@ def lexeme_to_token(lexeme: Lexeme) -> Token:
             return TokenDiv()
         case LexemeType.Caret:
             return TokenPow()
+        case LexemeType.UnaryMinus:
+            return TokenNegate()
     raise ParserError(f"Non-simple token provided to lexeme_to_token: {lexeme}")
-
-
-class ParserError(Exception):
-    pass
 
 
 class Parser:
@@ -39,23 +40,26 @@ class Parser:
         self.last_func_args = 1
 
     def __iter__(self) -> Iterator[Token]:
-        stream = self.parse()
-        return iter(stream)
+        return iter(self.parse())
 
     def parse(self) -> list[Token]:
+        last_lexeme: Lexeme | None = None
         for lexeme in self.lexeme_stream:
             match lexeme.tag:
                 case LexemeType.NumLit:
-                    self.output.append(lexeme_to_token(lexeme))
+                    self.parse_numlit(lexeme)
                 case LexemeType.Name:
                     self.parse_name(lexeme)
-                    continue
                 case LexemeType.Comma:
                     self.parse_comma()
                 case LexemeType.OpenParen:
                     self.stack.append(lexeme)
                 case LexemeType.CloseParen:
-                    self.parse_close_paren()
+                    self.parse_close_paren(last_lexeme)
+                case LexemeType.Minus:
+                    self.parse_minus(last_lexeme)
+                case LexemeType.Eq:
+                    self.parse_equals()
                 # All of the special operators have now been dealt with,
                 # and we can parse the regular operators.
                 case _:
@@ -64,35 +68,64 @@ class Parser:
                     op: LexemeOp = lexeme
                     self.parse_op(op)
 
+            last_lexeme = lexeme
+
+        # Dump the stack from top to bottom into the output
         for lexeme in self.stack[::-1]:
             # Only simple operators should be left by now.
-            self.output.append(lexeme_to_token(lexeme))
+            if lexeme.tag != LexemeType.OpenParen:
+                self.output.append(lexeme_to_token(lexeme))
+        # Clear the stack, which is necessary to prevent parse_equals from injecting spurious tokens
+        self.stack = []
 
         return self.output
 
-    def parse_name(self, lexeme: LexemeName) -> None:
-        if lexeme.value[0].isupper():
-            if (
-                # We raise a ParserError if there is a function call not followed by parens
-                # (it's at the end of the stream, or followed by anything other than a openparen)
-                self.lexeme_stream.peek(None) == None
-                or self.lexeme_stream.peek().tag != LexemeType.OpenParen
-            ):
-                raise ParserError("Function call is missing parentheses")
-            # Only function call lexemes end up on the operator stack
-            self.stack.append(lexeme)
-        else:
-            # ... vars go straight to the output
-            self.output.append(TokenVar(lexeme.value))
+    def parse_equals(self) -> None:
+        left_side = self.output[::]
+        self.output = []
 
-    def parse_comma(self) -> None:
-        try:
-            self.slurp_paren()
-            self.last_func_args += 1
-        except IndexError:
-            raise ParserError("Comma placed outside of parentheses")
+        body = self.parse()
 
-    def parse_close_paren(self) -> None:
+        match len(left_side):
+            case l if l == 1:
+                if left_side[0].tag != TokenType.Var:
+                    raise ParserError("Variable names must be lowercased")
+
+                # Clear the output so the VarAssign token lives alone
+                self.output = []
+                self.output.append(TokenVarAssign(left_side[0].name, body[::-1]))
+
+            case l if l > 1:
+                # After this, only the args should remain
+                # We must also check to make sure the func_token is actually a FuncCall
+                func_token = left_side.pop()
+                if func_token.tag != TokenType.FuncCall:
+                    raise ParserError("Function definition has bad syntax")
+                elif len(left_side) != func_token.num_args:
+                    raise ParserError(
+                        "Function definition has incorrect number of commas"
+                    )
+
+                # We also have to check that the args list consists only of variables
+                args: list[TokenVar] = left_side[::]
+                for tok in left_side:
+                    if tok.tag != TokenType.Var:
+                        raise ParserError(
+                            "Function definition has non-variable argument"
+                        )
+
+                args_strings = [tok.name for tok in args]
+
+                # Clear the output so that the FuncDef token lives alone
+                self.output = []
+                self.output.append(
+                    TokenFuncDef(func_token.name, args_strings, body[::-1])
+                )
+
+    def parse_close_paren(self, last_lexeme: Lexeme | None) -> None:
+        if last_lexeme and last_lexeme.tag == LexemeType.OpenParen:
+            raise ParserError("Empty parentheses are not allowed")
+
         try:
             self.slurp_paren()
             if self.stack.pop().tag != LexemeType.OpenParen:
@@ -112,6 +145,46 @@ class Parser:
         except IndexError:
             raise ParserError("Mismatched parentheses")
 
+        self.insert_implicit_multiplication()
+
+    def parse_comma(self) -> None:
+        try:
+            self.slurp_paren()
+            self.last_func_args += 1
+        except IndexError:
+            raise ParserError("Comma placed outside of parentheses")
+
+    def parse_name(self, lexeme: LexemeName) -> None:
+        next_lexeme = self.lexeme_stream.peek(None)
+
+        if lexeme.value[0].isupper():
+            if (
+                # We raise a ParserError if there is a function call not followed by parens
+                # (it's at the end of the stream, or followed by anything other than a openparen)
+                not next_lexeme or next_lexeme.tag != LexemeType.OpenParen
+            ):
+                raise ParserError("Function call is missing parentheses")
+            # Only function call lexemes end up on the operator stack
+            self.stack.append(lexeme)
+        else:
+            # ... vars go straight to the output, after checking for implicit multiplication
+            self.insert_implicit_multiplication()
+            self.output.append(TokenVar(lexeme.value))
+
+    def parse_numlit(self, lexeme: LexemeNumLit) -> None:
+        self.insert_implicit_multiplication()
+        self.output.append(lexeme_to_token(lexeme))
+
+    def parse_minus(self, last_lexeme: Lexeme | None) -> None:
+        if not last_lexeme or last_lexeme.tag not in [
+            LexemeType.NumLit,
+            LexemeType.Name,
+            LexemeType.CloseParen,
+        ]:
+            self.stack.append(LexemeUnaryMinus())
+        else:
+            self.parse_op(LexemeMinus())
+
     def parse_op(self, lexeme: LexemeOp) -> None:
         while self.stack_has_precedence(lexeme):
             self.output.append(lexeme_to_token(self.stack.pop()))
@@ -121,6 +194,21 @@ class Parser:
     def slurp_paren(self) -> None:
         while self.stack[-1].tag != LexemeType.OpenParen:
             self.output.append(lexeme_to_token(self.stack.pop()))
+
+    # !!! NOTE !!! This method can modify the lexeme input stream!
+    def insert_implicit_multiplication(self) -> None:
+        if self.has_implicit_multiplication():
+            self.lexeme_stream.prepend(LexemeStar())
+
+    def has_implicit_multiplication(self) -> bool:
+        next_lexeme = self.lexeme_stream.peek(None)
+        if next_lexeme and next_lexeme.tag in [
+            LexemeType.NumLit,
+            LexemeType.Name,
+            LexemeType.OpenParen,
+        ]:
+            return True
+        return False
 
     def stack_has_precedence(self, op: LexemeOp) -> bool:
         # If there's nothing on the stack, it doesn't have precedence
