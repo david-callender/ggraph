@@ -1,3 +1,5 @@
+from typing import override
+
 from PySide6 import QtCore, QtWidgets
 from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import QVBoxLayout
@@ -9,9 +11,10 @@ from ggraph.interpreter import Env, InterpreterError, interpret
 from ggraph.lexer import Lexer
 from ggraph.parser import Parser
 from ggraph.settings_manager import SettingsManager
+from ggraph.tab_interface import TabInterface
 
 
-class CalculatorView(QtWidgets.QWidget):
+class CalculatorView(TabInterface):
     def __init__(self, settings: SettingsManager) -> None:
         super().__init__()
 
@@ -33,16 +36,11 @@ class CalculatorView(QtWidgets.QWidget):
         self.historyScroller.setWidget(self.historyHolder)
         self.historyScroller.setWidgetResizable(True)
 
-        self.submitMathButton.clicked.connect(self.submitMath)
-        self.setupKeybinds()
-
         layout = QtWidgets.QVBoxLayout(self)
 
         layout.addWidget(self.historyScroller)
         layout.addWidget(self.mathsBox)
         layout.addWidget(self.submitMathButton)
-
-        self.mathsBox.setFocus()
 
     def parseMath(self, input: str) -> tuple[str, bool]:
         try:
@@ -51,6 +49,16 @@ class CalculatorView(QtWidgets.QWidget):
             return (str(interpret(p, self.root_env)), False)
         except (LexerError, ParserError, InterpreterError, ZeroDivisionError) as e:
             return (str(e), True)
+
+    @override
+    def onFocused(self) -> None:
+        self.mathsBox.setFocus()
+        self.submitMathButton.clicked.connect(self.submitMath)
+        self.setupKeybinds()
+
+    @override
+    def onUnfocused(self) -> None:
+        self.submitMathButton.clicked.disconnect()
 
     @QtCore.Slot()
     def submitMath(self) -> None:
@@ -65,8 +73,10 @@ class CalculatorView(QtWidgets.QWidget):
         newHistoryRow = HistoryLine(text, parsedResult[0])
         newHistoryRow.themeOutputLabel(parsedResult[1])
         self.historyLayout.addWidget(newHistoryRow)
+
         self.historyManager.addToCalcHistory(text)
-        self.historyManager.addToCalcHistory(parsedResult[0])
+        if not parsedResult[1]:  # add result to history on success
+            self.historyManager.addToCalcHistory(parsedResult[0])
 
         self.mathsBox.setText("")
 
