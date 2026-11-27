@@ -16,7 +16,7 @@ class GraphCanvas(QtWidgets.QWidget):
         super().__init__(parent)
         self.settings = settings
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        self.points: list[tuple[float, float]] = []
+        self.points: list[tuple[float, float | None]] = []
         self.inputStrings: list[str] = [""]
 
     def drawGraph(self) -> None:
@@ -41,35 +41,53 @@ class GraphCanvas(QtWidgets.QWidget):
         convertedPoints = self.convertGraphPointListToViewPointList(self.points)
 
         if len(convertedPoints) == 1:
-            line = QLineF(
+            self.createLine(
+                painter,
                 convertedPoints[0][0],
                 convertedPoints[0][1],
                 convertedPoints[0][0],
                 convertedPoints[0][1],
             )
-            painter.drawLine(line)
 
             painter.end()
             return
 
         for i in range(len(self.points) - 1):
-            line = QLineF(
+            self.createLine(
+                painter,
                 convertedPoints[i][0],
                 convertedPoints[i][1],
                 convertedPoints[i + 1][0],
                 convertedPoints[i + 1][1],
             )
-            painter.drawLine(line)
 
         painter.end()
+
+    def createLine(
+        self,
+        painter: QPainter,
+        x1: float,
+        y1: float | None,
+        x2: float,
+        y2: float | None,
+    ) -> None:
+        if y1 is None or y2 is None:
+            return
+        line = QLineF(
+            x1,
+            y1,
+            x2,
+            y2,
+        )
+        painter.drawLine(line)
 
     @override
     def paintEvent(self, event) -> None:
         self.drawGraph()
 
     def convertGraphPointListToViewPointList(
-        self, points: list[tuple[float, float]]
-    ) -> list[tuple[float, float]]:
+        self, points: list[tuple[float, float | None]]
+    ) -> list[tuple[float, float | None]]:
 
         viewWidth = self.width()
         viewHeight = self.height()
@@ -80,7 +98,7 @@ class GraphCanvas(QtWidgets.QWidget):
         maxY = self.settings.getGraphMaxY()
         graphHeight = maxY - minY
 
-        newPoints = [(0.0, 0.0)] * len(points)
+        newPoints: list[tuple[float, float | None]] = [(0.0, 0.0)] * len(points)
         for i in range(len(points)):
             newPoints[i] = self.convertGraphPointToViewPoint(
                 points[i], minX, minY, graphWidth, graphHeight, viewWidth, viewHeight
@@ -89,18 +107,20 @@ class GraphCanvas(QtWidgets.QWidget):
 
     def convertGraphPointToViewPoint(
         self,
-        point: tuple[float, float],
+        point: tuple[float, float | None],
         minX: float,
         minY: float,
         graphWidth: float,
         graphHeight: float,
         viewWidth: float,
         viewHeight: float,
-    ) -> tuple[float, float]:
+    ) -> tuple[float, float | None]:
         x = point[0]
         y = point[1]
 
         x = ((x - minX) / graphWidth) * viewWidth
+        if y is None:
+            return (x, y)
         y = ((y - minY) / graphHeight) * viewHeight
 
         y = viewHeight - y
@@ -112,13 +132,25 @@ class GraphCanvas(QtWidgets.QWidget):
             l = Lexer(input)
             p = Parser(l).parse()
             print(p)
-            p.reverse()
 
             env = Env(None)
             for i in range(len(self.points)):
                 x = self.points[i][0]
                 env.vars["x"] = x
-                self.points[i] = (x, float(interpret(p[:], env)))
+                try:
+                    y = interpret(p[:], env)
+                    if isinstance(y, complex):
+                        y = None  # we can handle graphing complex points later for radial or something
+                except (
+                    LexerError,
+                    ParserError,
+                    InterpreterError,
+                    ZeroDivisionError,
+                    TypeError,
+                ) as e:
+                    print(e)
+                    y = None
+                self.points[i] = (x, y)
         except (LexerError, ParserError, InterpreterError, ZeroDivisionError) as e:
             print(e)
 
@@ -129,7 +161,6 @@ class GraphCanvas(QtWidgets.QWidget):
         minX = self.settings.getGraphMinX()
         maxX = self.settings.getGraphMaxX()
         graphWidth = maxX - minX
-        minY = self.settings.getGraphMinY()
 
         for i in range(steps):
             x = (i / steps) * graphWidth + minX
